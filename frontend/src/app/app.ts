@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
@@ -6,7 +6,7 @@ import { startWith } from 'rxjs';
 import { AuthMode, AuthService } from './core/auth/auth.service';
 import { TaskClassifierService } from './core/classification/task-classifier.service';
 import { ProviderRecommendationService } from './core/recommendation/provider-recommendation.service';
-import { TaskPersistenceService } from './core/tasks/task-persistence.service';
+import { RecentTask, TaskPersistenceService } from './core/tasks/task-persistence.service';
 import {
   TASK_CATEGORIES,
   TASK_CATEGORY_LABELS,
@@ -41,6 +41,8 @@ export class App {
   protected readonly taskSaveMessage = signal('');
   protected readonly taskSaveIsError = signal(false);
   protected readonly taskSaving = signal(false);
+  protected readonly recentTasks = signal<RecentTask[]>([]);
+  protected readonly recentTasksLoading = signal(false);
   protected readonly workModes = WORK_MODES;
   protected readonly workModeLabels = WORK_MODE_LABELS;
   protected readonly taskCategories = TASK_CATEGORIES;
@@ -117,6 +119,16 @@ export class App {
     this.mode() === 'sign-in' ? 'Create account' : 'Use existing account'
   );
 
+  constructor() {
+    effect(() => {
+      if (this.auth.signedIn()) {
+        void this.loadRecentTasks();
+      } else {
+        this.recentTasks.set([]);
+      }
+    });
+  }
+
   protected setMode(mode: AuthMode): void {
     this.mode.set(mode);
     this.message.set('');
@@ -174,8 +186,22 @@ export class App {
 
       this.taskSaveMessage.set(result.message);
       this.taskSaveIsError.set(!result.ok);
+
+      if (result.ok) {
+        await this.loadRecentTasks();
+      }
     } finally {
       this.taskSaving.set(false);
+    }
+  }
+
+  protected async loadRecentTasks(): Promise<void> {
+    this.recentTasksLoading.set(true);
+
+    try {
+      this.recentTasks.set(await this.taskPersistence.loadRecentTasks());
+    } finally {
+      this.recentTasksLoading.set(false);
     }
   }
 }

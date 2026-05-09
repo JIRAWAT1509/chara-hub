@@ -204,7 +204,8 @@ button:disabled {
 }
 
 .result-panel,
-.prepared-prompt {
+.prepared-prompt,
+.recent-tasks {
   border-top: 1px solid rgba(23, 32, 38, 0.12);
   padding-top: 18px;
 }
@@ -253,6 +254,60 @@ button:disabled {
   gap: 16px;
   border-top: 1px solid rgba(23, 32, 38, 0.12);
   padding-top: 18px;
+}
+
+.recent-tasks {
+  display: grid;
+  gap: 16px;
+}
+
+.recent-task-list {
+  display: grid;
+  gap: 12px;
+}
+
+.recent-task-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  border: 1px solid rgba(23, 32, 38, 0.12);
+  border-radius: 6px;
+  background: #ffffff;
+  padding: 14px;
+}
+
+.recent-task-item p {
+  display: -webkit-box;
+  margin-top: 6px;
+  overflow: hidden;
+  color: #4f5961;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.recent-task-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.recent-task-meta span {
+  border-radius: 999px;
+  background: #eef8f5;
+  padding: 6px 10px;
+  color: #1f6b64;
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.empty-state {
+  border: 1px dashed rgba(23, 32, 38, 0.18);
+  border-radius: 6px;
+  padding: 16px;
+  color: #687076;
 }
 
 pre {
@@ -310,6 +365,17 @@ pre {
   .workspace-actions {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .recent-task-item,
+  .recent-task-meta {
+    grid-template-columns: 1fr;
+    align-items: flex-start;
+  }
+
+  .recent-task-meta {
+    flex-direction: row;
+    flex-wrap: wrap;
   }
 }
 
