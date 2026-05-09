@@ -14,10 +14,12 @@ describe('App', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render title', async () => {
+  it('should render the auth shell', async () => {
     const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, chara-hub');
+    expect(compiled.querySelector('h1')?.textContent).toContain('AI work starts here.');
+    expect(compiled.querySelector('button[type="submit"]')?.textContent).toContain('Sign in');
   });
 });
