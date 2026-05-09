@@ -15,8 +15,8 @@
       <section class="task-workspace">
         <div class="workspace-header">
           <div>
-            <p class="eyebrow">New Task</p>
-            <h2>Route the prompt before sending it.</h2>
+            <p class="eyebrow">Dashboard</p>
+            <h2>Current workflow state</h2>
           </div>
 
           <button
@@ -28,6 +28,89 @@
             Sign out
           </button>
         </div>
+
+        <section class="dashboard-summary" aria-label="Workflow summary">
+          <div class="dashboard-grid">
+            <article class="summary-tile">
+              <span>Mode</span>
+              <strong>{{ workModeLabels[dashboardDefaultWorkMode()] }}</strong>
+              <small>{{ activeWorkflowStatus() }}</small>
+            </article>
+
+            <article class="summary-tile">
+              <span>Recent tasks</span>
+              <strong>{{ recentTasks().length }}</strong>
+              <small>{{ filteredRecentTasks().length }} visible</small>
+            </article>
+
+            <article class="summary-tile">
+              <span>Handoffs</span>
+              <strong>{{ sentTaskCount() }}</strong>
+              <small>{{ preparedTaskCount() }} prepared</small>
+            </article>
+
+            <article class="summary-tile">
+              <span>Templates</span>
+              <strong>{{ availablePromptTemplates().length }}</strong>
+              <small>{{ promptTemplates().length }} loaded</small>
+            </article>
+          </div>
+
+          <div class="workspace-header">
+            <div class="detail-block">
+              <p class="eyebrow">Latest task</p>
+
+              @if (latestRecentTask(); as task) {
+                <h3>{{ task.title || 'Untitled task' }}</h3>
+                <div class="detail-meta">
+                  <span>{{ taskStatusLabels[task.status] }}</span>
+                  <span>{{ taskCategoryLabels[task.category] }}</span>
+                  <span>{{ workModeLabels[task.work_mode] }}</span>
+                </div>
+              } @else {
+                <p class="subtle-note">No saved tasks yet.</p>
+              }
+            </div>
+
+            <nav class="dashboard-actions" aria-label="Workspace shortcuts">
+              <button
+                class="secondary-button"
+                type="button"
+                (click)="scrollToSection('new-task')"
+              >
+                New Task
+              </button>
+              <button
+                class="secondary-button"
+                type="button"
+                (click)="scrollToSection('templates')"
+              >
+                Templates
+              </button>
+              <button
+                class="secondary-button"
+                type="button"
+                (click)="scrollToSection('history')"
+              >
+                History
+              </button>
+              <button
+                class="secondary-button"
+                type="button"
+                (click)="scrollToSection('settings')"
+              >
+                Settings
+              </button>
+            </nav>
+          </div>
+        </section>
+
+        <section id="new-task" class="workspace-section">
+          <div>
+            <p class="eyebrow">New Task</p>
+            <h2>Route the prompt before sending it.</h2>
+          </div>
+        </section>
 
         <form class="task-form" [formGroup]="taskForm">
           <label>
@@ -151,7 +234,7 @@
           </section>
         </div>
 
-        <section class="template-panel">
+        <section id="templates" class="template-panel">
           <div class="workspace-header">
             <div>
               <p class="eyebrow">Templates</p>
@@ -290,7 +373,7 @@
           </button>
         </div>
 
-        <section class="settings-panel">
+        <section id="settings" class="settings-panel">
           <div class="workspace-header">
             <div>
               <p class="eyebrow">Settings</p>
@@ -331,7 +414,7 @@
           }
         </section>
 
-        <section class="recent-tasks">
+        <section id="history" class="recent-tasks">
           <div class="workspace-header">
             <div>
               <p class="eyebrow">History</p>
