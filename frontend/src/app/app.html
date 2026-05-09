@@ -12,17 +12,103 @@
     </div>
 
     @if (auth.signedIn()) {
-      <div class="signed-in-layout">
-        <section class="session-summary">
-          <p class="eyebrow">Signed in</p>
-          <h2>{{ auth.user()?.email }}</h2>
-          <p>Your profile row is bootstrapped in Supabase. The New Task workspace comes next.</p>
-        </section>
+      <section class="task-workspace">
+        <div class="workspace-header">
+          <div>
+            <p class="eyebrow">New Task</p>
+            <h2>Route the prompt before sending it.</h2>
+          </div>
 
-        <button class="secondary-button" type="button" (click)="signOut()" [disabled]="auth.loading()">
-          Sign out
-        </button>
-      </div>
+          <button class="secondary-button" type="button" (click)="signOut()" [disabled]="auth.loading()">
+            Sign out
+          </button>
+        </div>
+
+        <form class="task-form" [formGroup]="taskForm">
+          <label>
+            Task title
+            <input type="text" formControlName="title" placeholder="Optional short label" />
+          </label>
+
+          <label>
+            Prompt
+            <textarea
+              formControlName="rawPrompt"
+              rows="8"
+              placeholder="Paste the task you want to hand off to the right AI tool"
+            ></textarea>
+          </label>
+
+          <div class="control-grid">
+            <label>
+              Work mode
+              <select formControlName="workMode">
+                @for (workMode of workModes; track workMode) {
+                  <option [value]="workMode">{{ workModeLabels[workMode] }}</option>
+                }
+              </select>
+            </label>
+
+            <label>
+              Selected category
+              <select formControlName="category">
+                @for (category of taskCategories; track category) {
+                  <option [value]="category">{{ taskCategoryLabels[category] }}</option>
+                }
+              </select>
+            </label>
+          </div>
+        </form>
+
+        <div class="result-grid">
+          <section class="result-panel">
+            <div class="result-heading">
+              <div>
+                <p class="eyebrow">Detected category</p>
+                <h3>{{ taskCategoryLabels[classification().category] }}</h3>
+              </div>
+              <span>{{ (classification().confidence * 100).toFixed(0) }}%</span>
+            </div>
+
+            <p>{{ classification().reason }}</p>
+
+            @if (classification().matchedSignals.length) {
+              <div class="signal-list">
+                @for (signal of classification().matchedSignals; track signal) {
+                  <span>{{ signal }}</span>
+                }
+              </div>
+            }
+
+            <button class="secondary-button" type="button" (click)="useDetectedCategory()">
+              Use detected category
+            </button>
+          </section>
+
+          <section class="result-panel">
+            <div class="result-heading">
+              <div>
+                <p class="eyebrow">Recommended provider</p>
+                <h3>{{ recommendation().primaryProviderName }}</h3>
+              </div>
+              <span>{{ (recommendation().confidence * 100).toFixed(0) }}%</span>
+            </div>
+
+            <p>{{ recommendation().reason }}</p>
+
+            <div class="signal-list">
+              @for (provider of recommendation().alternativeProviderNames; track provider) {
+                <span>{{ provider }}</span>
+              }
+            </div>
+          </section>
+        </div>
+
+        <section class="prepared-prompt">
+          <p class="eyebrow">Prepared prompt preview</p>
+          <pre>{{ preparedPrompt() || 'Write a task to generate the prepared prompt.' }}</pre>
+        </section>
+      </section>
     } @else {
       <form class="auth-form" [formGroup]="authForm" (ngSubmit)="submit()">
         <div class="form-header">
@@ -74,6 +160,7 @@
       <span>Hub mode</span>
       <span>Supabase Auth</span>
       <span>RLS-backed schema</span>
+      <span>Local classifier</span>
     </div>
   </aside>
 </main>

@@ -1,7 +1,26 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { startWith } from 'rxjs';
 
 import { AuthMode, AuthService } from './core/auth/auth.service';
+import { TaskClassifierService } from './core/classification/task-classifier.service';
+import { ProviderRecommendationService } from './core/recommendation/provider-recommendation.service';
+import {
+  TASK_CATEGORIES,
+  TASK_CATEGORY_LABELS,
+  WORK_MODES,
+  WORK_MODE_LABELS,
+  TaskCategory,
+  WorkMode
+} from './core/models';
+
+interface TaskDraftValue {
+  title: string;
+  rawPrompt: string;
+  workMode: WorkMode;
+  category: TaskCategory;
+}
 
 @Component({
   selector: 'app-root',
@@ -11,15 +30,78 @@ import { AuthMode, AuthService } from './core/auth/auth.service';
 })
 export class App {
   private readonly formBuilder = inject(FormBuilder);
+  private readonly classifier = inject(TaskClassifierService);
+  private readonly recommender = inject(ProviderRecommendationService);
   protected readonly auth = inject(AuthService);
   protected readonly mode = signal<AuthMode>('sign-in');
   protected readonly message = signal('');
   protected readonly messageIsError = signal(false);
+  protected readonly workModes = WORK_MODES;
+  protected readonly workModeLabels = WORK_MODE_LABELS;
+  protected readonly taskCategories = TASK_CATEGORIES;
+  protected readonly taskCategoryLabels = TASK_CATEGORY_LABELS;
 
   protected readonly authForm = this.formBuilder.nonNullable.group({
     displayName: [''],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(8)]]
+  });
+
+  protected readonly taskForm = this.formBuilder.nonNullable.group({
+    title: [''],
+    rawPrompt: ['', [Validators.required, Validators.minLength(6)]],
+    workMode: ['CHARA_WORK' as WorkMode],
+    category: ['CODING_LOGICAL' as TaskCategory]
+  });
+
+  private readonly taskValue = toSignal(
+    this.taskForm.valueChanges.pipe(startWith(this.taskForm.getRawValue())),
+    {
+      initialValue: this.taskForm.getRawValue()
+    }
+  );
+
+  private readonly taskDraft = computed<TaskDraftValue>(() => {
+    const task = this.taskValue();
+
+    return {
+      title: task.title ?? '',
+      rawPrompt: task.rawPrompt ?? '',
+      workMode: task.workMode ?? 'CHARA_WORK',
+      category: task.category ?? 'CODING_LOGICAL'
+    };
+  });
+
+  protected readonly classification = computed(() => {
+    const task = this.taskDraft();
+
+    return this.classifier.classify({
+      rawPrompt: task.rawPrompt,
+      workMode: task.workMode
+    });
+  });
+
+  protected readonly recommendation = computed(() => {
+    const task = this.taskDraft();
+
+    return this.recommender.recommend(task.category, task.workMode);
+  });
+
+  protected readonly preparedPrompt = computed(() => {
+    const task = this.taskDraft();
+
+    if (!task.rawPrompt.trim()) {
+      return '';
+    }
+
+    return [
+      `Work mode: ${this.workModeLabels[task.workMode]}`,
+      `Category: ${this.taskCategoryLabels[task.category]}`,
+      `Recommended provider: ${this.recommendation().primaryProviderName}`,
+      '',
+      'Task:',
+      task.rawPrompt.trim()
+    ].join('\n');
   });
 
   protected readonly submitLabel = computed(() =>
@@ -57,6 +139,10 @@ export class App {
     await this.auth.signOut();
     this.message.set('');
     this.messageIsError.set(false);
+  }
+
+  protected useDetectedCategory(): void {
+    this.taskForm.controls.category.setValue(this.classification().category);
   }
 }
 
