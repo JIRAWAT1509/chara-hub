@@ -3,7 +3,15 @@ import { Injectable, inject } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { ClassificationResult } from '../classification/task-classifier.service';
 import { ProviderRecommendationPreview } from '../recommendation/provider-recommendation.service';
-import { ProviderId, Task, TaskCategory, TaskHistoryEventType, WorkMode } from '../models';
+import {
+  ProviderId,
+  ProviderRecommendation,
+  Task,
+  TaskCategory,
+  TaskHistory,
+  TaskHistoryEventType,
+  WorkMode,
+} from '../models';
 
 export interface SaveTaskInput {
   title: string;
@@ -37,6 +45,12 @@ export interface RecentTask {
   work_mode: WorkMode;
   status: string;
   created_at: string;
+}
+
+export interface TaskDetail {
+  task: Task;
+  recommendation: ProviderRecommendation | null;
+  history: TaskHistory[];
 }
 
 @Injectable({
@@ -159,6 +173,74 @@ export class TaskPersistenceService {
       Task,
       'id' | 'title' | 'raw_prompt' | 'category' | 'work_mode' | 'status' | 'created_at'
     >[];
+  }
+
+  async loadTaskDetail(taskId: string): Promise<TaskDetail | null> {
+    const client = this.auth.supabaseClient;
+    const userId = this.auth.user()?.id;
+
+    if (!client || !userId) {
+      return null;
+    }
+
+    const { data: task, error: taskError } = await client
+      .from('tasks')
+      .select(
+        [
+          'id',
+          'user_profile_id',
+          'title',
+          'raw_prompt',
+          'prepared_prompt',
+          'work_mode',
+          'category',
+          'status',
+          'detected_category',
+          'selected_category',
+          'confidence',
+          'matched_signals',
+          'created_at',
+          'updated_at',
+        ].join(','),
+      )
+      .eq('id', taskId)
+      .eq('user_profile_id', userId)
+      .single();
+
+    if (taskError || !task) {
+      return null;
+    }
+
+    const { data: recommendations } = await client
+      .from('provider_recommendations')
+      .select(
+        [
+          'id',
+          'task_id',
+          'primary_provider_id',
+          'alternative_provider_ids',
+          'confidence',
+          'reason',
+          'created_at',
+        ].join(','),
+      )
+      .eq('task_id', taskId)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    const { data: history } = await client
+      .from('task_history')
+      .select('id,task_id,event_type,provider_id,details,created_at')
+      .eq('task_id', taskId)
+      .order('created_at', { ascending: true });
+
+    return {
+      task: task as unknown as Task,
+      recommendation: recommendations?.length
+        ? (recommendations[0] as unknown as ProviderRecommendation)
+        : null,
+      history: (history ?? []) as unknown as TaskHistory[],
+    };
   }
 
   async recordTaskHistoryEvent(input: RecordTaskHistoryEventInput): Promise<SaveTaskResult> {

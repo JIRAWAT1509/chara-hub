@@ -212,6 +212,7 @@ button:disabled {
 .result-panel,
 .prepared-prompt,
 .handoff-panel,
+.task-detail-panel,
 .recent-tasks {
   border-top: 1px solid rgba(23, 32, 38, 0.12);
   padding-top: 18px;
@@ -287,6 +288,76 @@ button:disabled {
 .recent-tasks {
   display: grid;
   gap: 16px;
+}
+
+.task-detail-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.task-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.detail-block {
+  display: grid;
+  gap: 10px;
+}
+
+.detail-block p:not(.eyebrow) {
+  color: #4f5961;
+  line-height: 1.55;
+}
+
+.detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.detail-meta span {
+  border-radius: 999px;
+  background: #eef8f5;
+  padding: 6px 10px;
+  color: #1f6b64;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.timeline-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.timeline-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  border-left: 3px solid #23726a;
+  background: #ffffff;
+  padding: 10px 12px;
+}
+
+.timeline-list li div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.timeline-list strong {
+  color: #172026;
+}
+
+.timeline-list span,
+.timeline-list time {
+  color: #687076;
+  font-size: 0.85rem;
+  font-weight: 700;
 }
 
 .recent-task-list {
@@ -393,7 +464,8 @@ pre {
   }
 
   .control-grid,
-  .result-grid {
+  .result-grid,
+  .task-detail-grid {
     grid-template-columns: 1fr;
   }
 
@@ -411,5 +483,9 @@ pre {
   .recent-task-meta {
     flex-direction: row;
     flex-wrap: wrap;
+  }
+
+  .timeline-list li {
+    flex-direction: column;
   }
 }

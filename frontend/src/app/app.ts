@@ -6,7 +6,11 @@ import { startWith } from 'rxjs';
 import { AuthMode, AuthService } from './core/auth/auth.service';
 import { TaskClassifierService } from './core/classification/task-classifier.service';
 import { ProviderRecommendationService } from './core/recommendation/provider-recommendation.service';
-import { RecentTask, TaskPersistenceService } from './core/tasks/task-persistence.service';
+import {
+  RecentTask,
+  TaskDetail,
+  TaskPersistenceService,
+} from './core/tasks/task-persistence.service';
 import {
   TASK_CATEGORIES,
   TASK_CATEGORY_LABELS,
@@ -55,6 +59,23 @@ const PROVIDER_HANDOFFS: Record<string, Pick<ProviderHandoff, 'url' | 'manualTex
   },
 };
 
+const PROVIDER_NAMES: Record<string, string> = {
+  chatgpt: 'ChatGPT',
+  claude: 'Claude',
+  microsoft_copilot: 'Microsoft Copilot / Teams AI',
+  codex: 'Codex',
+  claude_code: 'Claude Code',
+};
+
+const TASK_HISTORY_EVENT_LABELS: Record<string, string> = {
+  CREATED: 'Created',
+  CLASSIFIED: 'Classified',
+  TEMPLATE_APPLIED: 'Template applied',
+  COPIED_PROMPT: 'Copied prompt',
+  OPENED_PROVIDER: 'Opened provider',
+  ARCHIVED: 'Archived',
+};
+
 @Component({
   selector: 'app-root',
   imports: [ReactiveFormsModule],
@@ -79,6 +100,9 @@ export class App {
   protected readonly activeTaskId = signal<string | null>(null);
   protected readonly recentTasks = signal<RecentTask[]>([]);
   protected readonly recentTasksLoading = signal(false);
+  protected readonly selectedTaskDetail = signal<TaskDetail | null>(null);
+  protected readonly taskDetailLoading = signal(false);
+  protected readonly taskDetailMessage = signal('');
   protected readonly workModes = WORK_MODES;
   protected readonly workModeLabels = WORK_MODE_LABELS;
   protected readonly taskCategories = TASK_CATEGORIES;
@@ -182,6 +206,7 @@ export class App {
         void this.loadRecentTasks();
       } else {
         this.recentTasks.set([]);
+        this.selectedTaskDetail.set(null);
       }
     });
   }
@@ -248,6 +273,10 @@ export class App {
       if (result.ok) {
         this.activeTaskId.set(result.taskId ?? null);
         await this.loadRecentTasks();
+
+        if (result.taskId) {
+          await this.loadTaskDetail(result.taskId);
+        }
       }
     } finally {
       this.taskSaving.set(false);
@@ -298,6 +327,7 @@ export class App {
 
       if (result.ok) {
         await this.loadRecentTasks();
+        await this.loadTaskDetail(taskId);
       }
     } catch (error) {
       this.handoffMessage.set(
@@ -368,6 +398,7 @@ export class App {
 
       if (result.ok) {
         await this.loadRecentTasks();
+        await this.loadTaskDetail(taskId);
       }
     } finally {
       this.handoffBusy.set(false);
@@ -395,6 +426,50 @@ export class App {
     this.activeTaskId.set(task.id);
     this.taskSaveMessage.set('Task loaded for reuse. Save it again when ready.');
     this.taskSaveIsError.set(false);
+  }
+
+  protected async viewTaskDetail(task: RecentTask): Promise<void> {
+    await this.loadTaskDetail(task.id);
+  }
+
+  protected closeTaskDetail(): void {
+    this.selectedTaskDetail.set(null);
+    this.taskDetailMessage.set('');
+  }
+
+  protected providerName(providerId: ProviderId | null): string {
+    if (!providerId) {
+      return 'No provider';
+    }
+
+    return PROVIDER_NAMES[providerId] ?? providerId;
+  }
+
+  protected historyEventLabel(eventType: string): string {
+    return TASK_HISTORY_EVENT_LABELS[eventType] ?? eventType;
+  }
+
+  protected formatDateTime(value: string): string {
+    return new Intl.DateTimeFormat(undefined, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(new Date(value));
+  }
+
+  private async loadTaskDetail(taskId: string): Promise<void> {
+    this.taskDetailLoading.set(true);
+    this.taskDetailMessage.set('');
+
+    try {
+      const detail = await this.taskPersistence.loadTaskDetail(taskId);
+      this.selectedTaskDetail.set(detail);
+
+      if (!detail) {
+        this.taskDetailMessage.set('Task detail could not be loaded.');
+      }
+    } finally {
+      this.taskDetailLoading.set(false);
+    }
   }
 
   private async copyText(text: string): Promise<void> {
