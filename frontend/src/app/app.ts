@@ -192,6 +192,18 @@ export class App {
     });
   });
 
+  protected readonly promptCharacterCount = computed(
+    () => this.taskDraft().rawPrompt.trim().length,
+  );
+
+  protected readonly taskReadyToSave = computed(
+    () => this.auth.configReady() && !this.taskSaving() && this.taskForm.valid,
+  );
+
+  protected readonly handoffReady = computed(() => !this.handoffBusy() && this.taskForm.valid);
+
+  protected readonly hasActiveSavedTask = computed(() => Boolean(this.activeTaskId()));
+
   protected readonly classification = computed(() => {
     const task = this.taskDraft();
 
