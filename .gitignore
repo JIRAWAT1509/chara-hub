@@ -1,6 +1,8 @@
 # Private planning docs
 *.md
 !README.md
+!docs/
+!docs/*.md
 
 # Environment
 .env
