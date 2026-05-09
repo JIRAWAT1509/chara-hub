@@ -27,6 +27,10 @@ export class AuthService {
   readonly user = computed<User | null>(() => this.session()?.user ?? null);
   readonly signedIn = computed(() => Boolean(this.user()));
 
+  get supabaseClient(): SupabaseClient | null {
+    return this.client;
+  }
+
   constructor() {
     void this.initialize();
   }
@@ -135,10 +139,10 @@ export class AuthService {
     const fallbackName = user.user_metadata?.['display_name'] as string | undefined;
 
     const profile: Pick<UserProfile, 'id' | 'display_name' | 'default_work_mode'> = {
-        id: user.id,
-        display_name: displayName || fallbackName || user.email || 'Chara Hub User',
-        default_work_mode: 'CHARA'
-      };
+      id: user.id,
+      display_name: displayName || fallbackName || user.email || 'Chara Hub User',
+      default_work_mode: 'CHARA'
+    };
 
     await this.client.from('user_profiles').upsert(
       profile,

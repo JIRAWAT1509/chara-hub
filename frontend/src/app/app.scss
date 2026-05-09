@@ -40,7 +40,6 @@
 
 .brand-row,
 .form-header,
-.signed-in-layout,
 .workspace-header,
 .result-heading {
   display: flex;
@@ -97,8 +96,7 @@ h3 {
   background: #eef8f5;
 }
 
-.auth-form,
-.signed-in-layout {
+.auth-form {
   width: min(100%, 520px);
   margin-top: 64px;
 }
@@ -187,17 +185,6 @@ button:disabled {
   color: #8a3d2f;
 }
 
-.session-summary {
-  display: grid;
-  gap: 10px;
-  max-width: 420px;
-}
-
-.session-summary p:last-child {
-  color: #4f5961;
-  line-height: 1.55;
-}
-
 .task-workspace {
   display: grid;
   gap: 24px;
@@ -259,6 +246,15 @@ button:disabled {
   gap: 10px;
 }
 
+.workspace-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-top: 1px solid rgba(23, 32, 38, 0.12);
+  padding-top: 18px;
+}
+
 pre {
   min-height: 160px;
   margin: 0;
@@ -297,20 +293,23 @@ pre {
 
   .brand-row,
   .form-header,
-  .signed-in-layout,
   .workspace-header,
   .result-heading {
     flex-direction: column;
   }
 
-  .auth-form,
-  .signed-in-layout {
+  .auth-form {
     margin-top: 48px;
   }
 
   .control-grid,
   .result-grid {
     grid-template-columns: 1fr;
+  }
+
+  .workspace-actions {
+    align-items: stretch;
+    flex-direction: column;
   }
 }
 
