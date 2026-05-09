@@ -19,6 +19,7 @@ import {
   WORK_MODES,
   WORK_MODE_LABELS,
   ProviderId,
+  PromptTemplate,
   TaskCategory,
   TaskStatus,
   WorkMode,
@@ -110,6 +111,12 @@ export class App {
   protected readonly selectedTaskDetail = signal<TaskDetail | null>(null);
   protected readonly taskDetailLoading = signal(false);
   protected readonly taskDetailMessage = signal('');
+  protected readonly promptTemplates = signal<PromptTemplate[]>([]);
+  protected readonly promptTemplatesLoading = signal(false);
+  protected readonly templateMessage = signal('');
+  protected readonly templateMessageIsError = signal(false);
+  protected readonly selectedTemplateId = signal('');
+  protected readonly appliedTemplate = signal<PromptTemplate | null>(null);
   protected readonly workModes = WORK_MODES;
   protected readonly workModeLabels = WORK_MODE_LABELS;
   protected readonly taskCategories = TASK_CATEGORIES;
@@ -204,6 +211,22 @@ export class App {
 
   protected readonly hasActiveSavedTask = computed(() => Boolean(this.activeTaskId()));
 
+  protected readonly availablePromptTemplates = computed(() => {
+    const task = this.taskDraft();
+
+    return this.promptTemplates().filter(
+      (template) =>
+        template.category === task.category &&
+        (!template.work_mode || template.work_mode === task.workMode),
+    );
+  });
+
+  protected readonly selectedTemplate = computed(() => {
+    const selectedId = this.selectedTemplateId();
+
+    return this.availablePromptTemplates().find((template) => template.id === selectedId) ?? null;
+  });
+
   protected readonly classification = computed(() => {
     const task = this.taskDraft();
 
@@ -224,6 +247,12 @@ export class App {
 
     if (!task.rawPrompt.trim()) {
       return '';
+    }
+
+    const appliedTemplate = this.appliedTemplate();
+
+    if (appliedTemplate) {
+      return this.renderTemplate(appliedTemplate.body, task);
     }
 
     return [
@@ -269,8 +298,12 @@ export class App {
     effect(() => {
       if (this.auth.signedIn()) {
         void this.loadRecentTasks();
+        void this.loadPromptTemplates();
       } else {
         this.recentTasks.set([]);
+        this.promptTemplates.set([]);
+        this.selectedTemplateId.set('');
+        this.appliedTemplate.set(null);
         this.selectedTaskDetail.set(null);
       }
     });
@@ -340,6 +373,7 @@ export class App {
         await this.loadRecentTasks();
 
         if (result.taskId) {
+          await this.recordAppliedTemplate(result.taskId);
           await this.loadTaskDetail(result.taskId);
         }
       }
@@ -480,6 +514,57 @@ export class App {
     }
   }
 
+  protected async loadPromptTemplates(): Promise<void> {
+    this.promptTemplatesLoading.set(true);
+
+    try {
+      this.promptTemplates.set(await this.taskPersistence.loadPromptTemplates());
+    } finally {
+      this.promptTemplatesLoading.set(false);
+    }
+  }
+
+  protected selectTemplate(templateId: string): void {
+    this.selectedTemplateId.set(templateId);
+    this.templateMessage.set('');
+    this.templateMessageIsError.set(false);
+  }
+
+  protected async applySelectedTemplate(): Promise<void> {
+    const template = this.selectedTemplate();
+
+    if (!template) {
+      this.templateMessage.set('Select a template before applying.');
+      this.templateMessageIsError.set(true);
+      return;
+    }
+
+    if (!this.taskDraft().rawPrompt.trim()) {
+      this.taskForm.controls.rawPrompt.markAsTouched();
+      this.templateMessage.set('Write a task before applying a template.');
+      this.templateMessageIsError.set(true);
+      return;
+    }
+
+    this.appliedTemplate.set(template);
+
+    const taskId = this.activeTaskId();
+    if (!taskId) {
+      this.templateMessage.set('Template applied. Save the task to record the template event.');
+      this.templateMessageIsError.set(false);
+      return;
+    }
+
+    await this.recordAppliedTemplate(taskId);
+    await this.loadTaskDetail(taskId);
+  }
+
+  protected clearAppliedTemplate(): void {
+    this.appliedTemplate.set(null);
+    this.templateMessage.set('Template cleared. The default prepared prompt is active.');
+    this.templateMessageIsError.set(false);
+  }
+
   protected clearHistoryFilters(): void {
     this.historyFilterForm.setValue({
       search: '',
@@ -498,6 +583,8 @@ export class App {
     });
 
     this.activeTaskId.set(task.id);
+    this.appliedTemplate.set(null);
+    this.selectedTemplateId.set('');
     this.taskSaveMessage.set('Task loaded for reuse. Save it again when ready.');
     this.taskSaveIsError.set(false);
   }
@@ -544,6 +631,46 @@ export class App {
     } finally {
       this.taskDetailLoading.set(false);
     }
+  }
+
+  private async recordAppliedTemplate(taskId: string): Promise<void> {
+    const template = this.appliedTemplate();
+
+    if (!template) {
+      return;
+    }
+
+    const result = await this.taskPersistence.recordTaskHistoryEvent({
+      taskId,
+      eventType: 'TEMPLATE_APPLIED',
+      details: {
+        source: 'new_task_workspace',
+        templateId: template.id,
+        templateName: template.name,
+        category: template.category,
+        workMode: template.work_mode,
+      },
+    });
+
+    this.templateMessage.set(
+      result.ok
+        ? `Template applied and recorded: ${template.name}.`
+        : `Template applied, but history failed: ${result.message}`,
+    );
+    this.templateMessageIsError.set(!result.ok);
+  }
+
+  private renderTemplate(templateBody: string, task: TaskDraftValue): string {
+    const replacements: Record<string, string> = {
+      rawPrompt: task.rawPrompt.trim(),
+      category: this.taskCategoryLabels[task.category],
+      workMode: this.workModeLabels[task.workMode],
+      provider: this.recommendation().primaryProviderName,
+    };
+
+    return templateBody.replace(/\{\{(rawPrompt|category|workMode|provider)\}\}/g, (_, key) => {
+      return replacements[key] ?? '';
+    });
   }
 
   private async copyText(text: string): Promise<void> {

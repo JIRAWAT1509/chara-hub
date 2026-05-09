@@ -230,6 +230,7 @@ button:disabled {
 }
 
 .result-panel,
+.template-panel,
 .prepared-prompt,
 .handoff-panel,
 .task-detail-panel,
@@ -302,6 +303,42 @@ button:disabled {
 .alternative-list div {
   display: grid;
   gap: 4px;
+}
+
+.template-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.template-picker {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.template-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.template-detail {
+  display: grid;
+  gap: 4px;
+  border-left: 3px solid #23726a;
+  background: #f8faf6;
+  padding: 10px 12px;
+}
+
+.template-detail strong {
+  color: #172026;
+}
+
+.template-detail span {
+  color: #4f5961;
+  line-height: 1.45;
 }
 
 .prepared-prompt {
@@ -550,7 +587,8 @@ pre {
   .control-grid,
   .result-grid,
   .task-detail-grid,
-  .history-filter-grid {
+  .history-filter-grid,
+  .template-picker {
     grid-template-columns: 1fr;
   }
 
@@ -560,6 +598,7 @@ pre {
   }
 
   .handoff-actions button,
+  .template-actions button,
   .workspace-actions button {
     width: 100%;
   }
