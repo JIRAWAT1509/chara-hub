@@ -12,8 +12,9 @@ import {
   TASK_CATEGORY_LABELS,
   WORK_MODES,
   WORK_MODE_LABELS,
+  ProviderId,
   TaskCategory,
-  WorkMode
+  WorkMode,
 } from './core/models';
 
 interface TaskDraftValue {
@@ -23,11 +24,42 @@ interface TaskDraftValue {
   category: TaskCategory;
 }
 
+interface ProviderHandoff {
+  providerId: ProviderId;
+  providerName: string;
+  url: string | null;
+  manualText: string;
+}
+
+const PROVIDER_HANDOFFS: Record<string, Pick<ProviderHandoff, 'url' | 'manualText'>> = {
+  chatgpt: {
+    url: 'https://chatgpt.com/',
+    manualText: 'Open ChatGPT and paste the prepared prompt.',
+  },
+  claude: {
+    url: 'https://claude.ai/',
+    manualText: 'Open Claude and paste the prepared prompt.',
+  },
+  microsoft_copilot: {
+    url: 'https://copilot.microsoft.com/',
+    manualText: 'Open Microsoft Copilot or Teams AI and paste the prepared prompt.',
+  },
+  codex: {
+    url: null,
+    manualText: 'Use Codex from your local coding workflow and paste the prepared prompt there.',
+  },
+  claude_code: {
+    url: null,
+    manualText:
+      'Use Claude Code from your local coding workflow and paste the prepared prompt there.',
+  },
+};
+
 @Component({
   selector: 'app-root',
   imports: [ReactiveFormsModule],
   templateUrl: './app.html',
-  styleUrl: './app.scss'
+  styleUrl: './app.scss',
 })
 export class App {
   private readonly formBuilder = inject(FormBuilder);
@@ -41,6 +73,10 @@ export class App {
   protected readonly taskSaveMessage = signal('');
   protected readonly taskSaveIsError = signal(false);
   protected readonly taskSaving = signal(false);
+  protected readonly handoffMessage = signal('');
+  protected readonly handoffIsError = signal(false);
+  protected readonly handoffBusy = signal(false);
+  protected readonly activeTaskId = signal<string | null>(null);
   protected readonly recentTasks = signal<RecentTask[]>([]);
   protected readonly recentTasksLoading = signal(false);
   protected readonly workModes = WORK_MODES;
@@ -51,21 +87,21 @@ export class App {
   protected readonly authForm = this.formBuilder.nonNullable.group({
     displayName: [''],
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(8)]]
+    password: ['', [Validators.required, Validators.minLength(8)]],
   });
 
   protected readonly taskForm = this.formBuilder.nonNullable.group({
     title: [''],
     rawPrompt: ['', [Validators.required, Validators.minLength(6)]],
     workMode: ['CHARA_WORK' as WorkMode],
-    category: ['CODING_LOGICAL' as TaskCategory]
+    category: ['CODING_LOGICAL' as TaskCategory],
   });
 
   private readonly taskValue = toSignal(
     this.taskForm.valueChanges.pipe(startWith(this.taskForm.getRawValue())),
     {
-      initialValue: this.taskForm.getRawValue()
-    }
+      initialValue: this.taskForm.getRawValue(),
+    },
   );
 
   private readonly taskDraft = computed<TaskDraftValue>(() => {
@@ -75,7 +111,7 @@ export class App {
       title: task.title ?? '',
       rawPrompt: task.rawPrompt ?? '',
       workMode: task.workMode ?? 'CHARA_WORK',
-      category: task.category ?? 'CODING_LOGICAL'
+      category: task.category ?? 'CODING_LOGICAL',
     };
   });
 
@@ -84,7 +120,7 @@ export class App {
 
     return this.classifier.classify({
       rawPrompt: task.rawPrompt,
-      workMode: task.workMode
+      workMode: task.workMode,
     });
   });
 
@@ -107,19 +143,40 @@ export class App {
       `Recommended provider: ${this.recommendation().primaryProviderName}`,
       '',
       'Task:',
-      task.rawPrompt.trim()
+      task.rawPrompt.trim(),
     ].join('\n');
   });
 
+  protected readonly providerHandoff = computed<ProviderHandoff>(() => {
+    const recommendation = this.recommendation();
+    const handoff = PROVIDER_HANDOFFS[recommendation.primaryProviderId] ?? {
+      url: null,
+      manualText: `Open ${recommendation.primaryProviderName} manually and paste the prepared prompt.`,
+    };
+
+    return {
+      providerId: recommendation.primaryProviderId,
+      providerName: recommendation.primaryProviderName,
+      url: handoff.url,
+      manualText: handoff.manualText,
+    };
+  });
+
   protected readonly submitLabel = computed(() =>
-    this.mode() === 'sign-in' ? 'Sign in' : 'Create account'
+    this.mode() === 'sign-in' ? 'Sign in' : 'Create account',
   );
 
   protected readonly modeToggleLabel = computed(() =>
-    this.mode() === 'sign-in' ? 'Create account' : 'Use existing account'
+    this.mode() === 'sign-in' ? 'Create account' : 'Use existing account',
   );
 
   constructor() {
+    this.taskForm.valueChanges.subscribe(() => {
+      this.activeTaskId.set(null);
+      this.handoffMessage.set('');
+      this.handoffIsError.set(false);
+    });
+
     effect(() => {
       if (this.auth.signedIn()) {
         void this.loadRecentTasks();
@@ -144,9 +201,10 @@ export class App {
     }
 
     const value = this.authForm.getRawValue();
-    const result = this.mode() === 'sign-in'
-      ? await this.auth.signIn(value.email, value.password)
-      : await this.auth.signUp(value.email, value.password, value.displayName);
+    const result =
+      this.mode() === 'sign-in'
+        ? await this.auth.signIn(value.email, value.password)
+        : await this.auth.signUp(value.email, value.password, value.displayName);
 
     this.message.set(result.message);
     this.messageIsError.set(!result.ok);
@@ -181,17 +239,138 @@ export class App {
         workMode: task.workMode,
         category: task.category,
         classification: this.classification(),
-        recommendation: this.recommendation()
+        recommendation: this.recommendation(),
       });
 
       this.taskSaveMessage.set(result.message);
       this.taskSaveIsError.set(!result.ok);
 
       if (result.ok) {
+        this.activeTaskId.set(result.taskId ?? null);
         await this.loadRecentTasks();
       }
     } finally {
       this.taskSaving.set(false);
+    }
+  }
+
+  protected async copyPreparedPrompt(): Promise<void> {
+    const prompt = this.preparedPrompt();
+
+    if (!prompt) {
+      this.taskForm.markAllAsTouched();
+      this.handoffMessage.set('Write a task before copying the prepared prompt.');
+      this.handoffIsError.set(true);
+      return;
+    }
+
+    this.handoffBusy.set(true);
+
+    try {
+      await this.copyText(prompt);
+
+      const taskId = this.activeTaskId();
+      if (!taskId) {
+        this.handoffMessage.set(
+          'Prompt copied. Save the task first if you want this handoff recorded.',
+        );
+        this.handoffIsError.set(false);
+        return;
+      }
+
+      const result = await this.taskPersistence.recordTaskHistoryEvent({
+        taskId,
+        eventType: 'COPIED_PROMPT',
+        providerId: this.providerHandoff().providerId,
+        markTaskSent: true,
+        details: {
+          source: 'new_task_workspace',
+          promptLength: prompt.length,
+        },
+      });
+
+      this.handoffMessage.set(
+        result.ok
+          ? 'Prompt copied and handoff recorded.'
+          : `Prompt copied, but history failed: ${result.message}`,
+      );
+      this.handoffIsError.set(!result.ok);
+
+      if (result.ok) {
+        await this.loadRecentTasks();
+      }
+    } catch (error) {
+      this.handoffMessage.set(
+        error instanceof Error ? error.message : 'Prompt could not be copied.',
+      );
+      this.handoffIsError.set(true);
+    } finally {
+      this.handoffBusy.set(false);
+    }
+  }
+
+  protected async openRecommendedProvider(): Promise<void> {
+    const handoff = this.providerHandoff();
+
+    if (!this.preparedPrompt()) {
+      this.taskForm.markAllAsTouched();
+      this.handoffMessage.set('Write a task before opening the provider.');
+      this.handoffIsError.set(true);
+      return;
+    }
+
+    if (!handoff.url) {
+      this.handoffMessage.set(handoff.manualText);
+      this.handoffIsError.set(false);
+      return;
+    }
+
+    const openedWindow = window.open(handoff.url, '_blank');
+    if (!openedWindow) {
+      this.handoffMessage.set(
+        'The browser blocked the provider tab. Allow popups or open it manually.',
+      );
+      this.handoffIsError.set(true);
+      return;
+    }
+
+    openedWindow.opener = null;
+
+    const taskId = this.activeTaskId();
+    if (!taskId) {
+      this.handoffMessage.set(
+        `${handoff.providerName} opened. Save the task first if you want this handoff recorded.`,
+      );
+      this.handoffIsError.set(false);
+      return;
+    }
+
+    this.handoffBusy.set(true);
+
+    try {
+      const result = await this.taskPersistence.recordTaskHistoryEvent({
+        taskId,
+        eventType: 'OPENED_PROVIDER',
+        providerId: handoff.providerId,
+        markTaskSent: true,
+        details: {
+          source: 'new_task_workspace',
+          url: handoff.url,
+        },
+      });
+
+      this.handoffMessage.set(
+        result.ok
+          ? `${handoff.providerName} opened and handoff recorded.`
+          : `${handoff.providerName} opened, but history failed: ${result.message}`,
+      );
+      this.handoffIsError.set(!result.ok);
+
+      if (result.ok) {
+        await this.loadRecentTasks();
+      }
+    } finally {
+      this.handoffBusy.set(false);
     }
   }
 
@@ -210,11 +389,33 @@ export class App {
       title: task.title ?? '',
       rawPrompt: task.raw_prompt,
       workMode: task.work_mode,
-      category: task.category
+      category: task.category,
     });
 
+    this.activeTaskId.set(task.id);
     this.taskSaveMessage.set('Task loaded for reuse. Save it again when ready.');
     this.taskSaveIsError.set(false);
   }
-}
 
+  private async copyText(text: string): Promise<void> {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return;
+    }
+
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'fixed';
+    textarea.style.left = '-9999px';
+    document.body.appendChild(textarea);
+    textarea.select();
+
+    const copied = document.execCommand('copy');
+    document.body.removeChild(textarea);
+
+    if (!copied) {
+      throw new Error('Prompt could not be copied.');
+    }
+  }
+}

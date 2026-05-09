@@ -19,7 +19,12 @@
             <h2>Route the prompt before sending it.</h2>
           </div>
 
-          <button class="secondary-button" type="button" (click)="signOut()" [disabled]="auth.loading()">
+          <button
+            class="secondary-button"
+            type="button"
+            (click)="signOut()"
+            [disabled]="auth.loading()"
+          >
             Sign out
           </button>
         </div>
@@ -109,6 +114,40 @@
           <pre>{{ preparedPrompt() || 'Write a task to generate the prepared prompt.' }}</pre>
         </section>
 
+        <section class="handoff-panel">
+          <div class="handoff-copy">
+            <p class="eyebrow">Handoff</p>
+            <h3>{{ providerHandoff().providerName }}</h3>
+            <p>{{ providerHandoff().manualText }}</p>
+          </div>
+
+          <div class="handoff-actions">
+            <button
+              class="secondary-button"
+              type="button"
+              (click)="copyPreparedPrompt()"
+              [disabled]="handoffBusy() || taskForm.invalid"
+            >
+              Copy prepared prompt
+            </button>
+
+            @if (providerHandoff().url) {
+              <button
+                class="primary-button"
+                type="button"
+                (click)="openRecommendedProvider()"
+                [disabled]="handoffBusy() || taskForm.invalid"
+              >
+                Open {{ providerHandoff().providerName }}
+              </button>
+            }
+          </div>
+
+          @if (handoffMessage()) {
+            <p class="form-message" [class.error]="handoffIsError()">{{ handoffMessage() }}</p>
+          }
+        </section>
+
         <div class="workspace-actions">
           @if (taskSaveMessage()) {
             <p class="form-message" [class.error]="taskSaveIsError()">{{ taskSaveMessage() }}</p>
@@ -131,7 +170,12 @@
               <h2>Saved handoffs</h2>
             </div>
 
-            <button class="secondary-button" type="button" (click)="loadRecentTasks()" [disabled]="recentTasksLoading()">
+            <button
+              class="secondary-button"
+              type="button"
+              (click)="loadRecentTasks()"
+              [disabled]="recentTasksLoading()"
+            >
               {{ recentTasksLoading() ? 'Refreshing...' : 'Refresh' }}
             </button>
           </div>
@@ -147,7 +191,9 @@
                   <div class="recent-task-meta">
                     <span>{{ taskCategoryLabels[task.category] }}</span>
                     <span>{{ workModeLabels[task.work_mode] }}</span>
-                    <button class="text-button" type="button" (click)="reuseTask(task)">Reuse</button>
+                    <button class="text-button" type="button" (click)="reuseTask(task)">
+                      Reuse
+                    </button>
                   </div>
                 </article>
               }
@@ -165,7 +211,11 @@
             <h2>{{ submitLabel() }}</h2>
           </div>
 
-          <button class="text-button" type="button" (click)="setMode(mode() === 'sign-in' ? 'sign-up' : 'sign-in')">
+          <button
+            class="text-button"
+            type="button"
+            (click)="setMode(mode() === 'sign-in' ? 'sign-up' : 'sign-in')"
+          >
             {{ modeToggleLabel() }}
           </button>
         </div>
@@ -195,7 +245,11 @@
           <p class="form-message" [class.error]="messageIsError()">{{ message() }}</p>
         }
 
-        <button class="primary-button" type="submit" [disabled]="auth.loading() || !auth.configReady()">
+        <button
+          class="primary-button"
+          type="submit"
+          [disabled]="auth.loading() || !auth.configReady()"
+        >
           {{ auth.loading() ? 'Working...' : submitLabel() }}
         </button>
       </form>
@@ -212,4 +266,3 @@
     </div>
   </aside>
 </main>
-
