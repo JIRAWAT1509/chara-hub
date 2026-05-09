@@ -117,6 +117,9 @@ export class App {
   protected readonly templateMessageIsError = signal(false);
   protected readonly selectedTemplateId = signal('');
   protected readonly appliedTemplate = signal<PromptTemplate | null>(null);
+  protected readonly settingsMessage = signal('');
+  protected readonly settingsMessageIsError = signal(false);
+  protected readonly settingsSaving = signal(false);
   protected readonly workModes = WORK_MODES;
   protected readonly workModeLabels = WORK_MODE_LABELS;
   protected readonly taskCategories = TASK_CATEGORIES;
@@ -142,6 +145,10 @@ export class App {
     category: ['ALL' as CategoryFilter],
     workMode: ['ALL' as WorkModeFilter],
     status: ['ALL' as StatusFilter],
+  });
+
+  protected readonly settingsForm = this.formBuilder.nonNullable.group({
+    defaultWorkMode: ['CHARA' as WorkMode],
   });
 
   private readonly taskValue = toSignal(
@@ -305,6 +312,22 @@ export class App {
         this.selectedTemplateId.set('');
         this.appliedTemplate.set(null);
         this.selectedTaskDetail.set(null);
+      }
+    });
+
+    effect(() => {
+      const profile = this.auth.profile();
+
+      if (!profile) {
+        return;
+      }
+
+      this.settingsForm.controls.defaultWorkMode.setValue(profile.default_work_mode, {
+        emitEvent: false,
+      });
+
+      if (!this.taskDraft().rawPrompt.trim()) {
+        this.taskForm.controls.workMode.setValue(profile.default_work_mode);
       }
     });
   }
@@ -521,6 +544,30 @@ export class App {
       this.promptTemplates.set(await this.taskPersistence.loadPromptTemplates());
     } finally {
       this.promptTemplatesLoading.set(false);
+    }
+  }
+
+  protected async saveDefaultWorkMode(): Promise<void> {
+    if (!this.auth.signedIn()) {
+      this.settingsMessage.set('Sign in before saving settings.');
+      this.settingsMessageIsError.set(true);
+      return;
+    }
+
+    this.settingsSaving.set(true);
+
+    try {
+      const defaultWorkMode = this.settingsForm.getRawValue().defaultWorkMode;
+      const result = await this.auth.updateDefaultWorkMode(defaultWorkMode);
+
+      this.settingsMessage.set(result.message);
+      this.settingsMessageIsError.set(!result.ok);
+
+      if (result.ok && !this.taskDraft().rawPrompt.trim()) {
+        this.taskForm.controls.workMode.setValue(defaultWorkMode);
+      }
+    } finally {
+      this.settingsSaving.set(false);
     }
   }
 

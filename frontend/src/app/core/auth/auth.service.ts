@@ -2,7 +2,7 @@ import { Injectable, computed, signal } from '@angular/core';
 import { AuthError, Session, SupabaseClient, User, createClient } from '@supabase/supabase-js';
 
 import { getRuntimeConfig, hasSupabaseConfig } from '../config/app-config';
-import { UserProfile } from '../models';
+import { UserProfile, WorkMode } from '../models';
 
 export type AuthMode = 'sign-in' | 'sign-up';
 
@@ -12,7 +12,7 @@ export interface AuthResult {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private readonly config = getRuntimeConfig();
@@ -21,6 +21,7 @@ export class AuthService {
     : null;
 
   readonly session = signal<Session | null>(null);
+  readonly profile = signal<UserProfile | null>(null);
   readonly loading = signal(false);
   readonly ready = signal(false);
   readonly configReady = signal(hasSupabaseConfig());
@@ -74,7 +75,7 @@ export class AuthService {
 
       return {
         ok: true,
-        message: 'Signed in.'
+        message: 'Signed in.',
       };
     } finally {
       this.loading.set(false);
@@ -94,9 +95,9 @@ export class AuthService {
         password,
         options: {
           data: {
-            display_name: displayName || email
-          }
-        }
+            display_name: displayName || email,
+          },
+        },
       });
 
       if (error) {
@@ -109,7 +110,7 @@ export class AuthService {
 
       return {
         ok: true,
-        message: data.session ? 'Account created.' : 'Check your email to confirm your account.'
+        message: data.session ? 'Account created.' : 'Check your email to confirm your account.',
       };
     } finally {
       this.loading.set(false);
@@ -126,6 +127,40 @@ export class AuthService {
     try {
       await this.client.auth.signOut();
       this.session.set(null);
+      this.profile.set(null);
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  async updateDefaultWorkMode(defaultWorkMode: WorkMode): Promise<AuthResult> {
+    if (!this.client || !this.user()) {
+      return this.configMissingResult();
+    }
+
+    this.loading.set(true);
+
+    try {
+      const { data, error } = await this.client
+        .from('user_profiles')
+        .update({ default_work_mode: defaultWorkMode })
+        .eq('id', this.user()!.id)
+        .select('id,display_name,default_work_mode,created_at,updated_at')
+        .single();
+
+      if (error || !data) {
+        return {
+          ok: false,
+          message: error?.message ?? 'Default work mode was not updated.',
+        };
+      }
+
+      this.profile.set(data as UserProfile);
+
+      return {
+        ok: true,
+        message: 'Default work mode updated.',
+      };
     } finally {
       this.loading.set(false);
     }
@@ -136,34 +171,47 @@ export class AuthService {
       return;
     }
 
+    const { data: existingProfile } = await this.client
+      .from('user_profiles')
+      .select('id,display_name,default_work_mode,created_at,updated_at')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (existingProfile) {
+      this.profile.set(existingProfile as UserProfile);
+      return;
+    }
+
     const fallbackName = user.user_metadata?.['display_name'] as string | undefined;
 
     const profile: Pick<UserProfile, 'id' | 'display_name' | 'default_work_mode'> = {
       id: user.id,
       display_name: displayName || fallbackName || user.email || 'Chara Hub User',
-      default_work_mode: 'CHARA'
+      default_work_mode: 'CHARA',
     };
 
-    await this.client.from('user_profiles').upsert(
-      profile,
-      {
-        onConflict: 'id'
-      }
-    );
+    const { data } = await this.client
+      .from('user_profiles')
+      .insert(profile)
+      .select('id,display_name,default_work_mode,created_at,updated_at')
+      .single();
+
+    if (data) {
+      this.profile.set(data as UserProfile);
+    }
   }
 
   private configMissingResult(): AuthResult {
     return {
       ok: false,
-      message: 'Supabase config is missing.'
+      message: 'Supabase config is missing.',
     };
   }
 
   private errorResult(error: AuthError): AuthResult {
     return {
       ok: false,
-      message: error.message
+      message: error.message,
     };
   }
 }
-

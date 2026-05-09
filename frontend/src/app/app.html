@@ -183,7 +183,7 @@
                   @for (template of availablePromptTemplates(); track template.id) {
                     <option [value]="template.id">
                       {{ template.name
-                      }}{{ template.work_mode ? ' · ' + workModeLabels[template.work_mode] : '' }}
+                      }}{{ template.work_mode ? ' - ' + workModeLabels[template.work_mode] : '' }}
                     </option>
                   }
                 </select>
@@ -289,6 +289,47 @@
             {{ taskSaving() ? 'Saving...' : 'Save task' }}
           </button>
         </div>
+
+        <section class="settings-panel">
+          <div class="workspace-header">
+            <div>
+              <p class="eyebrow">Settings</p>
+              <h2>Workflow defaults</h2>
+            </div>
+          </div>
+
+          <form class="settings-form" [formGroup]="settingsForm">
+            <label>
+              Default work mode
+              <select formControlName="defaultWorkMode">
+                @for (workMode of workModes; track workMode) {
+                  <option [value]="workMode">{{ workModeLabels[workMode] }}</option>
+                }
+              </select>
+            </label>
+
+            <button
+              class="secondary-button"
+              type="button"
+              (click)="saveDefaultWorkMode()"
+              [disabled]="settingsSaving() || auth.loading()"
+            >
+              {{ settingsSaving() ? 'Saving...' : 'Save default' }}
+            </button>
+          </form>
+
+          @if (auth.profile(); as profile) {
+            <p class="subtle-note">
+              Current default: {{ workModeLabels[profile.default_work_mode] }}
+            </p>
+          }
+
+          @if (settingsMessage()) {
+            <p class="form-message" [class.error]="settingsMessageIsError()">
+              {{ settingsMessage() }}
+            </p>
+          }
+        </section>
 
         <section class="recent-tasks">
           <div class="workspace-header">
