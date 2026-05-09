@@ -25,6 +25,7 @@ The Angular app provides the main Chara Hub workflow:
 Write a task
 -> Review detected category
 -> Review provider recommendation
+-> Apply a built-in prompt template when useful
 -> Review prepared prompt
 -> Save task
 -> Copy or open the target AI destination
@@ -48,7 +49,9 @@ Current implemented frontend scope:
 | Handoff history events | Implemented |
 | Recent history search/filter | Implemented |
 | Task detail and timeline | Implemented |
-| Built-in template application | Planned |
+| Built-in template application | Implemented |
+| Basic default work mode setting | Implemented |
+| Bundle budget cleanup | Implemented |
 
 [Back to Table of Contents](#table-of-contents)
 
@@ -62,7 +65,7 @@ Current frontend direction:
 | --- | --- |
 | Framework | Angular |
 | Styling | SCSS |
-| Routing | Angular Router |
+| Routing | Not active in MVP shell |
 | Package manager | npm |
 | Server-side rendering | Disabled for MVP |
 

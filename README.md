@@ -70,10 +70,11 @@ The expected MVP flow:
 2. User writes or pastes a task.
 3. The system classifies the task.
 4. The system recommends a provider or tool.
-5. The user reviews a prepared prompt.
-6. The user saves the task into history.
-7. The user copies the prompt or opens the target AI tool.
-8. The user can inspect and reuse saved tasks later.
+5. The user optionally applies a built-in prompt template.
+6. The user reviews a prepared prompt.
+7. The user saves the task into history.
+8. The user copies the prompt or opens the target AI tool.
+9. The user can inspect and reuse saved tasks later.
 ```
 
 Example:
@@ -170,8 +171,10 @@ Planned MVP features:
 | Task detail and event timeline | Implemented |
 | Search and filters for saved tasks | Implemented |
 | Reuse saved tasks | Implemented |
-| Built-in template application | Planned |
-| Basic settings for preferences | Planned |
+| Built-in template application | Implemented |
+| Basic settings for default work mode | Implemented |
+| Bundle budget cleanup | Implemented |
+| Provider preference settings | Planned |
 
 The most important MVP screen is the New Task workspace because it proves the core product loop.
 
@@ -291,7 +294,7 @@ Core MVP workflow implementation
 Current focus:
 
 ```text
-Make the New Task workflow useful end to end, then expose built-in templates and settings without expanding into agent mode.
+Keep the single-shell Hub workflow stable, then decide whether dashboard summary or backend activation is the next useful step.
 ```
 
 Implemented so far:
@@ -306,14 +309,17 @@ Implemented so far:
 7. Prepared prompt preview.
 8. Save, search, inspect, and reuse task history.
 9. Copy/open handoff actions with history events.
+10. Built-in prompt template selection and application.
+11. Basic settings for default work mode.
+12. Bundle cleanup by removing unused router runtime.
 ```
 
 Recommended next implementation order:
 
 ```text
-1. Add built-in template selection/application.
-2. Add basic settings for default work mode and provider preferences.
-3. Decide when Spring Boot should become active in the workflow.
+1. Add a lightweight dashboard/home summary inside the current shell.
+2. Decide when Spring Boot should become active in the workflow.
+3. Add provider preference settings.
 4. Add routed pages only after the single-shell MVP is stable.
 ```
 
