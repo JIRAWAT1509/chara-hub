@@ -250,6 +250,40 @@ button:disabled {
   font-weight: 700;
 }
 
+.recommendation-detail {
+  display: grid;
+  gap: 14px;
+}
+
+.recommendation-note {
+  display: grid;
+  gap: 4px;
+  border-left: 3px solid #23726a;
+  background: #f8faf6;
+  padding: 10px 12px;
+}
+
+.recommendation-note strong,
+.alternative-list strong {
+  color: #172026;
+}
+
+.recommendation-note span,
+.alternative-list span {
+  color: #4f5961;
+  line-height: 1.45;
+}
+
+.alternative-list {
+  display: grid;
+  gap: 10px;
+}
+
+.alternative-list div {
+  display: grid;
+  gap: 4px;
+}
+
 .prepared-prompt {
   display: grid;
   gap: 10px;
