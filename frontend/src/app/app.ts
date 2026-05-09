@@ -204,5 +204,17 @@ export class App {
       this.recentTasksLoading.set(false);
     }
   }
+
+  protected reuseTask(task: RecentTask): void {
+    this.taskForm.patchValue({
+      title: task.title ?? '',
+      rawPrompt: task.raw_prompt,
+      workMode: task.work_mode,
+      category: task.category
+    });
+
+    this.taskSaveMessage.set('Task loaded for reuse. Save it again when ready.');
+    this.taskSaveIsError.set(false);
+  }
 }
 

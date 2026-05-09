@@ -147,6 +147,7 @@
                   <div class="recent-task-meta">
                     <span>{{ taskCategoryLabels[task.category] }}</span>
                     <span>{{ workModeLabels[task.work_mode] }}</span>
+                    <button class="text-button" type="button" (click)="reuseTask(task)">Reuse</button>
                   </div>
                 </article>
               }
