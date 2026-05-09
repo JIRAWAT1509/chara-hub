@@ -5,6 +5,7 @@ import { ProviderId, TaskCategory, WorkMode } from '../models';
 export interface ProviderRecommendationPreview {
   primaryProviderId: ProviderId;
   primaryProviderName: string;
+  alternativeProviderIds: ProviderId[];
   alternativeProviderNames: string[];
   confidence: number;
   reason: string;
@@ -35,6 +36,7 @@ export class ProviderRecommendationService {
     return {
       primaryProviderId,
       primaryProviderName: primary.name,
+      alternativeProviderIds,
       alternativeProviderNames: alternativeProviderIds.map((id) => this.providers[id].name),
       confidence: this.confidence(category, workMode),
       reason: this.reason(category, workMode, primary.name)

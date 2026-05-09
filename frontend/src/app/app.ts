@@ -6,6 +6,7 @@ import { startWith } from 'rxjs';
 import { AuthMode, AuthService } from './core/auth/auth.service';
 import { TaskClassifierService } from './core/classification/task-classifier.service';
 import { ProviderRecommendationService } from './core/recommendation/provider-recommendation.service';
+import { TaskPersistenceService } from './core/tasks/task-persistence.service';
 import {
   TASK_CATEGORIES,
   TASK_CATEGORY_LABELS,
@@ -32,10 +33,14 @@ export class App {
   private readonly formBuilder = inject(FormBuilder);
   private readonly classifier = inject(TaskClassifierService);
   private readonly recommender = inject(ProviderRecommendationService);
+  private readonly taskPersistence = inject(TaskPersistenceService);
   protected readonly auth = inject(AuthService);
   protected readonly mode = signal<AuthMode>('sign-in');
   protected readonly message = signal('');
   protected readonly messageIsError = signal(false);
+  protected readonly taskSaveMessage = signal('');
+  protected readonly taskSaveIsError = signal(false);
+  protected readonly taskSaving = signal(false);
   protected readonly workModes = WORK_MODES;
   protected readonly workModeLabels = WORK_MODE_LABELS;
   protected readonly taskCategories = TASK_CATEGORIES;
@@ -143,6 +148,35 @@ export class App {
 
   protected useDetectedCategory(): void {
     this.taskForm.controls.category.setValue(this.classification().category);
+  }
+
+  protected async saveTask(): Promise<void> {
+    if (this.taskForm.invalid || !this.preparedPrompt()) {
+      this.taskForm.markAllAsTouched();
+      this.taskSaveMessage.set('Write a task before saving.');
+      this.taskSaveIsError.set(true);
+      return;
+    }
+
+    const task = this.taskDraft();
+    this.taskSaving.set(true);
+
+    try {
+      const result = await this.taskPersistence.saveTask({
+        title: task.title,
+        rawPrompt: task.rawPrompt,
+        preparedPrompt: this.preparedPrompt(),
+        workMode: task.workMode,
+        category: task.category,
+        classification: this.classification(),
+        recommendation: this.recommendation()
+      });
+
+      this.taskSaveMessage.set(result.message);
+      this.taskSaveIsError.set(!result.ok);
+    } finally {
+      this.taskSaving.set(false);
+    }
   }
 }
 
