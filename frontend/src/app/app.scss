@@ -233,6 +233,7 @@ button:disabled {
 .template-panel,
 .prepared-prompt,
 .handoff-panel,
+.settings-panel,
 .task-detail-panel,
 .recent-tasks {
   border-top: 1px solid rgba(23, 32, 38, 0.12);
@@ -378,6 +379,18 @@ button:disabled {
   gap: 16px;
   border-top: 1px solid rgba(23, 32, 38, 0.12);
   padding-top: 18px;
+}
+
+.settings-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.settings-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: end;
 }
 
 .recent-tasks {
@@ -588,7 +601,8 @@ pre {
   .result-grid,
   .task-detail-grid,
   .history-filter-grid,
-  .template-picker {
+  .template-picker,
+  .settings-form {
     grid-template-columns: 1fr;
   }
 
@@ -599,6 +613,7 @@ pre {
 
   .handoff-actions button,
   .template-actions button,
+  .settings-form button,
   .workspace-actions button {
     width: 100%;
   }
