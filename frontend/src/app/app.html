@@ -96,14 +96,48 @@
                 <p class="eyebrow">Recommended provider</p>
                 <h3>{{ recommendation().primaryProviderName }}</h3>
               </div>
-              <span>{{ (recommendation().confidence * 100).toFixed(0) }}%</span>
+              <span>{{ recommendation().confidenceLabel }}</span>
             </div>
 
             <p>{{ recommendation().reason }}</p>
 
-            <div class="signal-list">
-              @for (provider of recommendation().alternativeProviderNames; track provider) {
-                <span>{{ provider }}</span>
+            <div class="recommendation-detail">
+              <div>
+                <p class="eyebrow">Why this fits</p>
+                <div class="signal-list">
+                  @for (strength of recommendation().primaryProviderStrengths; track strength) {
+                    <span>{{ strength }}</span>
+                  }
+                </div>
+              </div>
+
+              <div class="recommendation-note">
+                <strong>{{ (recommendation().confidence * 100).toFixed(0) }}% confidence</strong>
+                <span>{{
+                  recommendation().handoffKind === 'URL' ? 'Browser handoff' : 'Manual tool handoff'
+                }}</span>
+              </div>
+
+              <div class="recommendation-note">
+                <strong>Watch out</strong>
+                <span>{{ recommendation().primaryProviderWeakFit }}</span>
+              </div>
+
+              @if (recommendation().alternativeSummaries.length) {
+                <div>
+                  <p class="eyebrow">Alternatives</p>
+                  <div class="alternative-list">
+                    @for (
+                      alternative of recommendation().alternativeSummaries;
+                      track alternative.providerId
+                    ) {
+                      <div>
+                        <strong>{{ alternative.providerName }}</strong>
+                        <span>{{ alternative.summary }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
               }
             </div>
           </section>
