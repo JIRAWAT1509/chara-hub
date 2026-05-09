@@ -2,6 +2,7 @@ import { Injectable, computed, signal } from '@angular/core';
 import { AuthError, Session, SupabaseClient, User, createClient } from '@supabase/supabase-js';
 
 import { getRuntimeConfig, hasSupabaseConfig } from '../config/app-config';
+import { UserProfile } from '../models';
 
 export type AuthMode = 'sign-in' | 'sign-up';
 
@@ -133,12 +134,14 @@ export class AuthService {
 
     const fallbackName = user.user_metadata?.['display_name'] as string | undefined;
 
-    await this.client.from('user_profiles').upsert(
-      {
+    const profile: Pick<UserProfile, 'id' | 'display_name' | 'default_work_mode'> = {
         id: user.id,
         display_name: displayName || fallbackName || user.email || 'Chara Hub User',
         default_work_mode: 'CHARA'
-      },
+      };
+
+    await this.client.from('user_profiles').upsert(
+      profile,
       {
         onConflict: 'id'
       }
