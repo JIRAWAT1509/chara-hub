@@ -217,6 +217,35 @@ button:disabled {
   margin-top: 48px;
 }
 
+.dashboard-summary {
+  display: grid;
+  gap: 18px;
+  padding-top: 18px;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.summary-tile {
+  display: grid;
+  gap: 6px;
+  border: 1px solid rgba(23, 32, 38, 0.12);
+  border-radius: 6px;
+  background: #ffffff;
+  padding: 14px;
+  min-width: 0;
+}
+
+.summary-tile strong {
+  overflow-wrap: anywhere;
+  color: #172026;
+  font-size: 1.35rem;
+  line-height: 1.1;
+}
+
 .task-form {
   display: grid;
   gap: 18px;
@@ -601,6 +630,7 @@ pre {
   .result-grid,
   .task-detail-grid,
   .history-filter-grid,
+  .dashboard-grid,
   .template-picker,
   .settings-form {
     grid-template-columns: 1fr;

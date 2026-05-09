@@ -206,6 +206,34 @@ export class App {
     });
   });
 
+  protected readonly latestRecentTask = computed(() => this.recentTasks()[0] ?? null);
+
+  protected readonly sentTaskCount = computed(
+    () => this.recentTasks().filter((task) => task.status === 'SENT').length,
+  );
+
+  protected readonly preparedTaskCount = computed(
+    () => this.recentTasks().filter((task) => task.status === 'PREPARED').length,
+  );
+
+  protected readonly dashboardDefaultWorkMode = computed(() => {
+    const profile = this.auth.profile();
+
+    return profile?.default_work_mode ?? this.taskDraft().workMode;
+  });
+
+  protected readonly activeWorkflowStatus = computed(() => {
+    if (this.hasActiveSavedTask()) {
+      return 'Saved task active';
+    }
+
+    if (this.taskDraft().rawPrompt.trim()) {
+      return 'Draft in progress';
+    }
+
+    return 'Ready for a task';
+  });
+
   protected readonly promptCharacterCount = computed(
     () => this.taskDraft().rawPrompt.trim().length,
   );
@@ -643,6 +671,13 @@ export class App {
   protected closeTaskDetail(): void {
     this.selectedTaskDetail.set(null);
     this.taskDetailMessage.set('');
+  }
+
+  protected scrollToSection(sectionId: string): void {
+    document.getElementById(sectionId)?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
   }
 
   protected providerName(providerId: ProviderId | null): string {
