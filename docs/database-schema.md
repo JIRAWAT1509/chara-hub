@@ -10,13 +10,14 @@ The schema is designed for the MVP Hub mode: task routing, provider recommendati
 
 1. [Schema Goals](#schema-goals)
 2. [Migration File](#migration-file)
-3. [Schema Strategy](#schema-strategy)
-4. [Tables](#tables)
-5. [Auth And Ownership](#auth-and-ownership)
-6. [Row Level Security](#row-level-security)
-7. [Seed Data](#seed-data)
-8. [MVP Boundaries](#mvp-boundaries)
-9. [Next Steps](#next-steps)
+3. [Applied Status](#applied-status)
+4. [Schema Strategy](#schema-strategy)
+5. [Tables](#tables)
+6. [Auth And Ownership](#auth-and-ownership)
+7. [Row Level Security](#row-level-security)
+8. [Seed Data](#seed-data)
+9. [MVP Boundaries](#mvp-boundaries)
+10. [Next Steps](#next-steps)
 
 ---
 
@@ -47,6 +48,22 @@ supabase/migrations/20260509195000_initial_schema.sql
 ```
 
 This migration creates the MVP tables, indexes, update timestamp triggers, Row Level Security policies, grants, and initial seed data.
+
+[Back to Table of Contents](#table-of-contents)
+
+---
+
+# Applied Status
+
+The initial migration has been applied manually through the Supabase SQL Editor.
+
+Applied migration:
+
+```text
+20260509195000_initial_schema.sql
+```
+
+Manual SQL Editor application is acceptable for the first MVP setup. A Supabase CLI workflow can be introduced later when migrations become frequent or when GitHub integration is enabled.
 
 [Back to Table of Contents](#table-of-contents)
 
@@ -172,10 +189,10 @@ Those models belong to later phases after Hub mode is useful.
 
 Recommended next steps:
 
-1. Review the SQL migration.
-2. Apply it to the Supabase project only after review.
-3. Add frontend auth flow.
-4. Add typed frontend models for task/category/provider data.
+1. Add frontend Supabase Auth setup.
+2. Add typed frontend models for task/category/provider data.
+3. Build the login and profile bootstrap flow.
+4. Build the New Task workspace against the real schema.
 5. Add backend DB dependencies only when the backend needs direct Postgres access.
 
 [Back to Table of Contents](#table-of-contents)
