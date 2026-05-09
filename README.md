@@ -70,9 +70,10 @@ The expected MVP flow:
 2. User writes or pastes a task.
 3. The system classifies the task.
 4. The system recommends a provider or tool.
-5. The user applies a prompt template if needed.
-6. The user copies the prompt or opens the target AI tool.
-7. The task is saved into history.
+5. The user reviews a prepared prompt.
+6. The user saves the task into history.
+7. The user copies the prompt or opens the target AI tool.
+8. The user can inspect and reuse saved tasks later.
 ```
 
 Example:
@@ -154,19 +155,23 @@ The first version focuses on Hub mode only.
 
 Planned MVP features:
 
-- simple login
-- prompt inbox
-- new task workspace
-- task category detection
-- manual category override
-- provider recommendation
-- prompt template injection
-- copy prompt action
-- open target action
-- task history
-- reusable templates
-- profile / work mode selection
-- basic settings for provider preferences
+| Feature | Status |
+| --- | --- |
+| Simple login | Implemented |
+| New Task workspace | Implemented |
+| Task category detection | Implemented |
+| Manual category override | Implemented |
+| Provider recommendation | Implemented |
+| Recommendation detail | Implemented |
+| Prepared prompt preview | Implemented |
+| Copy prompt action | Implemented |
+| Open target action for URL providers | Implemented |
+| Task history | Implemented |
+| Task detail and event timeline | Implemented |
+| Search and filters for saved tasks | Implemented |
+| Reuse saved tasks | Implemented |
+| Built-in template application | Planned |
+| Basic settings for preferences | Planned |
 
 The most important MVP screen is the New Task workspace because it proves the core product loop.
 
@@ -280,28 +285,38 @@ This boundary matters because the first version should solve a real workflow pro
 Current phase:
 
 ```text
-Planning and foundation
+Core MVP workflow implementation
 ```
 
 Current focus:
 
 ```text
-Define the product shape, MVP workflow, architecture, data model, classifier rules, and provider decision matrix before scaffolding the app.
+Make the New Task workflow useful end to end, then expose built-in templates and settings without expanding into agent mode.
+```
+
+Implemented so far:
+
+```text
+1. Angular frontend scaffold.
+2. Spring Boot backend scaffold.
+3. Supabase Auth and database schema.
+4. New Task workspace.
+5. Rule-first task classification.
+6. Provider recommendation and recommendation detail.
+7. Prepared prompt preview.
+8. Save, search, inspect, and reuse task history.
+9. Copy/open handoff actions with history events.
 ```
 
 Recommended next implementation order:
 
 ```text
-1. Finalize public README.
-2. Define data model.
-3. Define provider decision matrix.
-4. Define classifier rules.
-5. Scaffold Angular frontend.
-6. Scaffold Spring Boot backend.
-7. Connect Supabase auth/database.
-8. Build the New Task workspace first.
+1. Add built-in template selection/application.
+2. Add basic settings for default work mode and provider preferences.
+3. Decide when Spring Boot should become active in the workflow.
+4. Add routed pages only after the single-shell MVP is stable.
 ```
 
-The project intentionally starts small. The goal is to make the core workflow useful before adding desktop shells, local agents, or advanced automation.
+The project intentionally stays small. The goal is to make the core workflow useful before adding desktop shells, local agents, or advanced automation.
 
 [Back to Table of Contents](#table-of-contents)

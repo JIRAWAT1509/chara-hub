@@ -25,12 +25,30 @@ The Angular app provides the main Chara Hub workflow:
 Write a task
 -> Review detected category
 -> Review provider recommendation
--> Apply a prompt template
+-> Review prepared prompt
+-> Save task
 -> Copy or open the target AI destination
+-> Inspect task detail and event timeline
 -> Reuse previous tasks from history
 ```
 
 The first useful screen should be the New Task workspace because it proves the core product loop.
+
+Current implemented frontend scope:
+
+| Area | Status |
+| --- | --- |
+| Supabase Auth shell | Implemented |
+| New Task workspace | Implemented |
+| Local classifier | Implemented |
+| Provider recommendation detail | Implemented |
+| Prepared prompt preview | Implemented |
+| Save task to Supabase | Implemented |
+| Copy/open handoff actions | Implemented |
+| Handoff history events | Implemented |
+| Recent history search/filter | Implemented |
+| Task detail and timeline | Implemented |
+| Built-in template application | Planned |
 
 [Back to Table of Contents](#table-of-contents)
 
