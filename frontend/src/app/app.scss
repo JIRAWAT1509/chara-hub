@@ -120,6 +120,25 @@ label {
   font-weight: 700;
 }
 
+.label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.label-row small,
+.field-hint,
+.subtle-note {
+  color: #687076;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.field-hint {
+  color: #8a3d2f;
+}
+
 input,
 select,
 textarea {
@@ -155,6 +174,7 @@ button {
   font: inherit;
   font-weight: 760;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 button:disabled {
@@ -310,6 +330,10 @@ button:disabled {
   gap: 10px;
 }
 
+.handoff-actions button {
+  flex: 0 1 auto;
+}
+
 .workspace-actions {
   display: flex;
   align-items: center;
@@ -430,6 +454,11 @@ button:disabled {
   padding: 14px;
 }
 
+.recent-task-item.selected {
+  border-color: rgba(35, 114, 106, 0.48);
+  box-shadow: inset 3px 0 0 #23726a;
+}
+
 .recent-task-item p {
   display: -webkit-box;
   margin-top: 6px;
@@ -528,6 +557,11 @@ pre {
   .workspace-actions {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .handoff-actions button,
+  .workspace-actions button {
+    width: 100%;
   }
 
   .recent-task-item,

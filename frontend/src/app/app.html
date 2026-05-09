@@ -36,12 +36,20 @@
           </label>
 
           <label>
-            Prompt
+            <span class="label-row">
+              Prompt
+              <small>{{ promptCharacterCount() }} chars</small>
+            </span>
             <textarea
               formControlName="rawPrompt"
               rows="8"
               placeholder="Paste the task you want to hand off to the right AI tool"
             ></textarea>
+            @if (taskForm.controls.rawPrompt.touched && taskForm.controls.rawPrompt.invalid) {
+              <small class="field-hint"
+                >Write at least 6 characters before saving or handing off.</small
+              >
+            }
           </label>
 
           <div class="control-grid">
@@ -160,7 +168,7 @@
               class="secondary-button"
               type="button"
               (click)="copyPreparedPrompt()"
-              [disabled]="handoffBusy() || taskForm.invalid"
+              [disabled]="!handoffReady()"
             >
               Copy prepared prompt
             </button>
@@ -170,12 +178,18 @@
                 class="primary-button"
                 type="button"
                 (click)="openRecommendedProvider()"
-                [disabled]="handoffBusy() || taskForm.invalid"
+                [disabled]="!handoffReady()"
               >
                 Open {{ providerHandoff().providerName }}
               </button>
             }
           </div>
+
+          @if (preparedPrompt() && !hasActiveSavedTask()) {
+            <p class="subtle-note">
+              Save the task before handoff if you want copy/open events recorded.
+            </p>
+          }
 
           @if (handoffMessage()) {
             <p class="form-message" [class.error]="handoffIsError()">{{ handoffMessage() }}</p>
@@ -191,7 +205,7 @@
             class="primary-button"
             type="button"
             (click)="saveTask()"
-            [disabled]="taskSaving() || taskForm.invalid"
+            [disabled]="!taskReadyToSave()"
           >
             {{ taskSaving() ? 'Saving...' : 'Save task' }}
           </button>
@@ -264,10 +278,15 @@
             </div>
           </form>
 
-          @if (filteredRecentTasks().length) {
+          @if (recentTasksLoading() && !recentTasks().length) {
+            <p class="empty-state">Loading saved tasks...</p>
+          } @else if (filteredRecentTasks().length) {
             <div class="recent-task-list">
               @for (task of filteredRecentTasks(); track task.id) {
-                <article class="recent-task-item">
+                <article
+                  class="recent-task-item"
+                  [class.selected]="selectedTaskDetail()?.task?.id === task.id"
+                >
                   <div>
                     <h3>{{ task.title || 'Untitled task' }}</h3>
                     <p>{{ task.raw_prompt }}</p>
