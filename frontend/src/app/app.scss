@@ -290,6 +290,27 @@ button:disabled {
   gap: 16px;
 }
 
+.history-filter-form {
+  display: grid;
+  gap: 12px;
+}
+
+.history-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.history-filter-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #687076;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
 .task-detail-panel {
   display: grid;
   gap: 16px;
@@ -465,7 +486,8 @@ pre {
 
   .control-grid,
   .result-grid,
-  .task-detail-grid {
+  .task-detail-grid,
+  .history-filter-grid {
     grid-template-columns: 1fr;
   }
 
@@ -483,6 +505,11 @@ pre {
   .recent-task-meta {
     flex-direction: row;
     flex-wrap: wrap;
+  }
+
+  .history-filter-summary {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .timeline-list li {

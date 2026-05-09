@@ -10,6 +10,7 @@ import {
   TaskCategory,
   TaskHistory,
   TaskHistoryEventType,
+  TaskStatus,
   WorkMode,
 } from '../models';
 
@@ -43,7 +44,7 @@ export interface RecentTask {
   raw_prompt: string;
   category: TaskCategory;
   work_mode: WorkMode;
-  status: string;
+  status: TaskStatus;
   created_at: string;
 }
 
@@ -150,7 +151,7 @@ export class TaskPersistenceService {
     };
   }
 
-  async loadRecentTasks(limit = 5): Promise<RecentTask[]> {
+  async loadRecentTasks(limit = 25): Promise<RecentTask[]> {
     const client = this.auth.supabaseClient;
     const userId = this.auth.user()?.id;
 
