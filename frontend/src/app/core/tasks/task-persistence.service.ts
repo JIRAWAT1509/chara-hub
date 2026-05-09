@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { ClassificationResult } from '../classification/task-classifier.service';
 import { ProviderRecommendationPreview } from '../recommendation/provider-recommendation.service';
-import { TaskCategory, WorkMode } from '../models';
+import { Task, TaskCategory, WorkMode } from '../models';
 
 export interface SaveTaskInput {
   title: string;
@@ -19,6 +19,16 @@ export interface SaveTaskResult {
   ok: boolean;
   message: string;
   taskId?: string;
+}
+
+export interface RecentTask {
+  id: string;
+  title: string | null;
+  raw_prompt: string;
+  category: TaskCategory;
+  work_mode: WorkMode;
+  status: string;
+  created_at: string;
 }
 
 @Injectable({
@@ -120,6 +130,28 @@ export class TaskPersistenceService {
       taskId,
       message: 'Task saved.'
     };
+  }
+
+  async loadRecentTasks(limit = 5): Promise<RecentTask[]> {
+    const client = this.auth.supabaseClient;
+    const userId = this.auth.user()?.id;
+
+    if (!client || !userId) {
+      return [];
+    }
+
+    const { data, error } = await client
+      .from('tasks')
+      .select('id,title,raw_prompt,category,work_mode,status,created_at')
+      .eq('user_profile_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error || !data) {
+      return [];
+    }
+
+    return data as Pick<Task, 'id' | 'title' | 'raw_prompt' | 'category' | 'work_mode' | 'status' | 'created_at'>[];
   }
 }
 

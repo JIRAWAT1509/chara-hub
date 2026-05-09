@@ -123,6 +123,38 @@
             {{ taskSaving() ? 'Saving...' : 'Save task' }}
           </button>
         </div>
+
+        <section class="recent-tasks">
+          <div class="workspace-header">
+            <div>
+              <p class="eyebrow">Recent tasks</p>
+              <h2>Saved handoffs</h2>
+            </div>
+
+            <button class="secondary-button" type="button" (click)="loadRecentTasks()" [disabled]="recentTasksLoading()">
+              {{ recentTasksLoading() ? 'Refreshing...' : 'Refresh' }}
+            </button>
+          </div>
+
+          @if (recentTasks().length) {
+            <div class="recent-task-list">
+              @for (task of recentTasks(); track task.id) {
+                <article class="recent-task-item">
+                  <div>
+                    <h3>{{ task.title || 'Untitled task' }}</h3>
+                    <p>{{ task.raw_prompt }}</p>
+                  </div>
+                  <div class="recent-task-meta">
+                    <span>{{ taskCategoryLabels[task.category] }}</span>
+                    <span>{{ workModeLabels[task.work_mode] }}</span>
+                  </div>
+                </article>
+              }
+            </div>
+          } @else {
+            <p class="empty-state">No saved tasks yet.</p>
+          }
+        </section>
       </section>
     } @else {
       <form class="auth-form" [formGroup]="authForm" (ngSubmit)="submit()">
