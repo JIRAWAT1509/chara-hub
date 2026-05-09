@@ -1,0 +1,30 @@
+# Private planning docs
+*.md
+!README.md
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Frontend
+node_modules/
+.angular/
+dist/
+coverage/
+
+# Backend
+target/
+*.class
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
