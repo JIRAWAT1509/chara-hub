@@ -14,10 +14,13 @@ import {
 import {
   TASK_CATEGORIES,
   TASK_CATEGORY_LABELS,
+  TASK_STATUSES,
+  TASK_STATUS_LABELS,
   WORK_MODES,
   WORK_MODE_LABELS,
   ProviderId,
   TaskCategory,
+  TaskStatus,
   WorkMode,
 } from './core/models';
 
@@ -34,6 +37,10 @@ interface ProviderHandoff {
   url: string | null;
   manualText: string;
 }
+
+type CategoryFilter = TaskCategory | 'ALL';
+type WorkModeFilter = WorkMode | 'ALL';
+type StatusFilter = TaskStatus | 'ALL';
 
 const PROVIDER_HANDOFFS: Record<string, Pick<ProviderHandoff, 'url' | 'manualText'>> = {
   chatgpt: {
@@ -107,6 +114,8 @@ export class App {
   protected readonly workModeLabels = WORK_MODE_LABELS;
   protected readonly taskCategories = TASK_CATEGORIES;
   protected readonly taskCategoryLabels = TASK_CATEGORY_LABELS;
+  protected readonly taskStatuses = TASK_STATUSES;
+  protected readonly taskStatusLabels = TASK_STATUS_LABELS;
 
   protected readonly authForm = this.formBuilder.nonNullable.group({
     displayName: [''],
@@ -119,6 +128,13 @@ export class App {
     rawPrompt: ['', [Validators.required, Validators.minLength(6)]],
     workMode: ['CHARA_WORK' as WorkMode],
     category: ['CODING_LOGICAL' as TaskCategory],
+  });
+
+  protected readonly historyFilterForm = this.formBuilder.nonNullable.group({
+    search: [''],
+    category: ['ALL' as CategoryFilter],
+    workMode: ['ALL' as WorkModeFilter],
+    status: ['ALL' as StatusFilter],
   });
 
   private readonly taskValue = toSignal(
@@ -137,6 +153,43 @@ export class App {
       workMode: task.workMode ?? 'CHARA_WORK',
       category: task.category ?? 'CODING_LOGICAL',
     };
+  });
+
+  private readonly historyFilterValue = toSignal(
+    this.historyFilterForm.valueChanges.pipe(startWith(this.historyFilterForm.getRawValue())),
+    {
+      initialValue: this.historyFilterForm.getRawValue(),
+    },
+  );
+
+  protected readonly filteredRecentTasks = computed(() => {
+    const filters = this.historyFilterValue();
+    const search = (filters.search ?? '').trim().toLocaleLowerCase();
+    const category = filters.category ?? 'ALL';
+    const workMode = filters.workMode ?? 'ALL';
+    const status = filters.status ?? 'ALL';
+
+    return this.recentTasks().filter((task) => {
+      const matchesSearch =
+        !search ||
+        [
+          task.title ?? '',
+          task.raw_prompt,
+          this.taskCategoryLabels[task.category],
+          this.workModeLabels[task.work_mode],
+          this.taskStatusLabels[task.status],
+        ]
+          .join(' ')
+          .toLocaleLowerCase()
+          .includes(search);
+
+      return (
+        matchesSearch &&
+        (category === 'ALL' || task.category === category) &&
+        (workMode === 'ALL' || task.work_mode === workMode) &&
+        (status === 'ALL' || task.status === status)
+      );
+    });
   });
 
   protected readonly classification = computed(() => {
@@ -413,6 +466,15 @@ export class App {
     } finally {
       this.recentTasksLoading.set(false);
     }
+  }
+
+  protected clearHistoryFilters(): void {
+    this.historyFilterForm.setValue({
+      search: '',
+      category: 'ALL',
+      workMode: 'ALL',
+      status: 'ALL',
+    });
   }
 
   protected reuseTask(task: RecentTask): void {

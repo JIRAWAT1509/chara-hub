@@ -166,7 +166,7 @@
         <section class="recent-tasks">
           <div class="workspace-header">
             <div>
-              <p class="eyebrow">Recent tasks</p>
+              <p class="eyebrow">History</p>
               <h2>Saved handoffs</h2>
             </div>
 
@@ -180,15 +180,66 @@
             </button>
           </div>
 
-          @if (recentTasks().length) {
+          <form class="history-filter-form" [formGroup]="historyFilterForm">
+            <label>
+              Search
+              <input
+                type="search"
+                formControlName="search"
+                placeholder="Search title, prompt, status, or mode"
+              />
+            </label>
+
+            <div class="history-filter-grid">
+              <label>
+                Category
+                <select formControlName="category">
+                  <option value="ALL">All categories</option>
+                  @for (category of taskCategories; track category) {
+                    <option [value]="category">{{ taskCategoryLabels[category] }}</option>
+                  }
+                </select>
+              </label>
+
+              <label>
+                Work mode
+                <select formControlName="workMode">
+                  <option value="ALL">All modes</option>
+                  @for (workMode of workModes; track workMode) {
+                    <option [value]="workMode">{{ workModeLabels[workMode] }}</option>
+                  }
+                </select>
+              </label>
+
+              <label>
+                Status
+                <select formControlName="status">
+                  <option value="ALL">All statuses</option>
+                  @for (status of taskStatuses; track status) {
+                    <option [value]="status">{{ taskStatusLabels[status] }}</option>
+                  }
+                </select>
+              </label>
+            </div>
+
+            <div class="history-filter-summary">
+              <span>{{ filteredRecentTasks().length }} of {{ recentTasks().length }} shown</span>
+              <button class="text-button" type="button" (click)="clearHistoryFilters()">
+                Clear filters
+              </button>
+            </div>
+          </form>
+
+          @if (filteredRecentTasks().length) {
             <div class="recent-task-list">
-              @for (task of recentTasks(); track task.id) {
+              @for (task of filteredRecentTasks(); track task.id) {
                 <article class="recent-task-item">
                   <div>
                     <h3>{{ task.title || 'Untitled task' }}</h3>
                     <p>{{ task.raw_prompt }}</p>
                   </div>
                   <div class="recent-task-meta">
+                    <span>{{ taskStatusLabels[task.status] }}</span>
                     <span>{{ taskCategoryLabels[task.category] }}</span>
                     <span>{{ workModeLabels[task.work_mode] }}</span>
                     <button class="text-button" type="button" (click)="viewTaskDetail(task)">
@@ -201,6 +252,8 @@
                 </article>
               }
             </div>
+          } @else if (recentTasks().length) {
+            <p class="empty-state">No saved tasks match the current filters.</p>
           } @else {
             <p class="empty-state">No saved tasks yet.</p>
           }
@@ -230,7 +283,7 @@
                 <p class="eyebrow">Task</p>
                 <h3>{{ detail.task.title || 'Untitled task' }}</h3>
                 <div class="detail-meta">
-                  <span>{{ detail.task.status }}</span>
+                  <span>{{ taskStatusLabels[detail.task.status] }}</span>
                   <span>{{ taskCategoryLabels[detail.task.category] }}</span>
                   <span>{{ workModeLabels[detail.task.work_mode] }}</span>
                 </div>
