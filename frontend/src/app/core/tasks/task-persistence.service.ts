@@ -6,6 +6,7 @@ import { ProviderRecommendationPreview } from '../recommendation/provider-recomm
 import {
   ProviderId,
   ProviderRecommendation,
+  PromptTemplate,
   Task,
   TaskCategory,
   TaskHistory,
@@ -32,8 +33,11 @@ export interface SaveTaskResult {
 
 export interface RecordTaskHistoryEventInput {
   taskId: string;
-  eventType: Extract<TaskHistoryEventType, 'COPIED_PROMPT' | 'OPENED_PROVIDER'>;
-  providerId: ProviderId;
+  eventType: Extract<
+    TaskHistoryEventType,
+    'TEMPLATE_APPLIED' | 'COPIED_PROMPT' | 'OPENED_PROVIDER'
+  >;
+  providerId?: ProviderId | null;
   details?: Record<string, unknown>;
   markTaskSent?: boolean;
 }
@@ -244,6 +248,41 @@ export class TaskPersistenceService {
     };
   }
 
+  async loadPromptTemplates(): Promise<PromptTemplate[]> {
+    const client = this.auth.supabaseClient;
+    const userId = this.auth.user()?.id;
+
+    if (!client || !userId) {
+      return [];
+    }
+
+    const { data, error } = await client
+      .from('prompt_templates')
+      .select(
+        [
+          'id',
+          'user_profile_id',
+          'name',
+          'description',
+          'category',
+          'work_mode',
+          'body',
+          'is_built_in',
+          'is_favorite',
+          'created_at',
+          'updated_at',
+        ].join(','),
+      )
+      .order('is_built_in', { ascending: false })
+      .order('name', { ascending: true });
+
+    if (error || !data) {
+      return [];
+    }
+
+    return data as unknown as PromptTemplate[];
+  }
+
   async recordTaskHistoryEvent(input: RecordTaskHistoryEventInput): Promise<SaveTaskResult> {
     const client = this.auth.supabaseClient;
     const userId = this.auth.user()?.id;
@@ -251,14 +290,14 @@ export class TaskPersistenceService {
     if (!client || !userId) {
       return {
         ok: false,
-        message: 'Sign in and configure Supabase before recording handoff history.',
+        message: 'Sign in and configure Supabase before recording task history.',
       };
     }
 
     const { error: historyError } = await client.from('task_history').insert({
       task_id: input.taskId,
       event_type: input.eventType,
-      provider_id: input.providerId,
+      provider_id: input.providerId ?? null,
       details: input.details ?? {},
     });
 
@@ -289,7 +328,7 @@ export class TaskPersistenceService {
     return {
       ok: true,
       taskId: input.taskId,
-      message: 'Handoff history recorded.',
+      message: 'Task history recorded.',
     };
   }
 }

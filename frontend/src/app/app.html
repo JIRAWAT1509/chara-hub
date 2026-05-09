@@ -151,6 +151,85 @@
           </section>
         </div>
 
+        <section class="template-panel">
+          <div class="workspace-header">
+            <div>
+              <p class="eyebrow">Templates</p>
+              <h2>Shape the prepared prompt</h2>
+            </div>
+
+            <button
+              class="secondary-button"
+              type="button"
+              (click)="loadPromptTemplates()"
+              [disabled]="promptTemplatesLoading()"
+            >
+              {{ promptTemplatesLoading() ? 'Loading...' : 'Refresh templates' }}
+            </button>
+          </div>
+
+          @if (promptTemplatesLoading() && !promptTemplates().length) {
+            <p class="empty-state">Loading prompt templates...</p>
+          } @else if (availablePromptTemplates().length) {
+            <div class="template-picker">
+              <label>
+                Matching template
+                <select
+                  #templateSelect
+                  [value]="selectedTemplateId()"
+                  (change)="selectTemplate(templateSelect.value)"
+                >
+                  <option value="">Choose a template</option>
+                  @for (template of availablePromptTemplates(); track template.id) {
+                    <option [value]="template.id">
+                      {{ template.name
+                      }}{{ template.work_mode ? ' · ' + workModeLabels[template.work_mode] : '' }}
+                    </option>
+                  }
+                </select>
+              </label>
+
+              <div class="template-actions">
+                <button
+                  class="secondary-button"
+                  type="button"
+                  (click)="applySelectedTemplate()"
+                  [disabled]="!selectedTemplate() || taskForm.invalid"
+                >
+                  Apply template
+                </button>
+
+                @if (appliedTemplate()) {
+                  <button class="text-button" type="button" (click)="clearAppliedTemplate()">
+                    Clear template
+                  </button>
+                }
+              </div>
+            </div>
+
+            @if (selectedTemplate(); as template) {
+              <div class="template-detail">
+                <strong>{{ template.name }}</strong>
+                <span>{{ template.description || 'No description provided.' }}</span>
+              </div>
+            }
+
+            @if (appliedTemplate(); as template) {
+              <p class="subtle-note">Active template: {{ template.name }}</p>
+            }
+          } @else {
+            <p class="empty-state">
+              No matching templates for the selected category and work mode.
+            </p>
+          }
+
+          @if (templateMessage()) {
+            <p class="form-message" [class.error]="templateMessageIsError()">
+              {{ templateMessage() }}
+            </p>
+          }
+        </section>
+
         <section class="prepared-prompt">
           <p class="eyebrow">Prepared prompt preview</p>
           <pre>{{ preparedPrompt() || 'Write a task to generate the prepared prompt.' }}</pre>
