@@ -186,7 +186,7 @@ Current MVP features:
 | Backend status troubleshooting | Implemented |
 | MVP readiness review | Implemented |
 | MVP smoke-test checklist | Implemented |
-| MVP smoke-test run record | Blocked by missing local config |
+| MVP smoke-test run record | Public browser shell passed; authenticated workflow still pending |
 | HTTPS local backend status CORS | Implemented |
 | Login profile sync loop fix | Implemented |
 | Backend-owned user data flow | Deferred |
@@ -361,7 +361,7 @@ Implemented so far:
 21. Backend status troubleshooting.
 22. MVP readiness review.
 23. MVP smoke-test checklist.
-24. MVP smoke-test run record: automated checks passed, browser smoke test blocked by missing local `frontend/public/config.js`.
+24. MVP smoke-test run record: automated checks passed; public browser shell/backend-status check passed with local config.
 25. HTTPS local backend status CORS.
 26. Login profile sync loop fix after local browser smoke testing.
 ```
@@ -371,8 +371,8 @@ Recommended next implementation order:
 ```text
 1. Keep JWT validation deferred until the backend owns a protected endpoint.
 2. Add JWT validation before any backend endpoint owns user data.
-3. Continue the MVP browser smoke test with Tao's ignored local config files.
-4. Record pass/fail notes for auth, New Task, save/history/reuse, provider preferences, and backend status.
+3. Complete the authenticated MVP browser smoke test after Tao signs in locally.
+4. Record pass/fail notes for auth, New Task, save/history/reuse, and provider preferences.
 5. Fix only bugs found during smoke testing.
 6. Plan frontend component/route split after the MVP smoke test is stable.
 7. Move recommendation policy server-side only when frontend rules become hard to manage.

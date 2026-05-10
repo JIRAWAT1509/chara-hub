@@ -1,8 +1,8 @@
 # MVP Smoke-Test Run
 
-This document records the first MVP smoke-test run after the smoke-test checklist was added.
+This document records MVP smoke-test runs after the smoke-test checklist was added.
 
-The run confirms automated checks and records why the browser Supabase-backed smoke test could not be completed in this workspace yet.
+The latest run confirms automated checks, local runtime config presence, and the public browser shell/backend-status path. Authenticated workflow testing still needs Tao's real local session.
 
 ---
 
@@ -23,20 +23,21 @@ The run confirms automated checks and records why the browser Supabase-backed sm
 Run date:
 
 ```text
-2026-05-10
+2026-05-11
 ```
 
 Branch:
 
 ```text
-feature/mvp-smoke-test-run
+feature/mvp-browser-smoke-test
 ```
 
 Result:
 
 ```text
 Automated checks passed.
-Browser smoke test blocked by missing local frontend config.
+Public browser smoke test passed.
+Authenticated Supabase workflow smoke test still needs manual login/session.
 ```
 
 [Back to Table of Contents](#table-of-contents)
@@ -49,19 +50,20 @@ Browser smoke test blocked by missing local frontend config.
 | --- | --- | --- |
 | Frontend production build | `cd frontend && npm.cmd run build` | Passed |
 | Frontend tests | `cd frontend && npm.cmd test -- --watch=false` | Passed: 1 test file, 2 tests |
-| Backend tests | `cd backend && cmd /c mvnw.cmd test` | Passed: 3 tests |
+| Backend tests | `cd backend && cmd /c mvnw.cmd test` | Passed: 4 tests |
 
 Frontend build output:
 
 ```text
-Initial total: 441.08 kB raw / 105.40 kB estimated transfer
+Initial total: 441.15 kB raw / 105.44 kB estimated transfer
 ```
 
 Backend test coverage included:
 
 - application context load
 - passive backend status response
-- local frontend CORS for `/api/status`
+- HTTP local frontend CORS for `/api/status`
+- HTTPS local frontend CORS for `/api/status`
 
 [Back to Table of Contents](#table-of-contents)
 
@@ -73,10 +75,10 @@ Checked local config presence:
 
 | File | Present |
 | --- | --- |
-| `frontend/public/config.js` | No |
+| `frontend/public/config.js` | Yes |
 | `backend/src/main/resources/application-local.properties` | No |
 
-The frontend config is required for a real Supabase-backed browser smoke test.
+The frontend config exists locally and must remain uncommitted.
 
 The backend local config is not required for the current passive status endpoint.
 
@@ -86,9 +88,24 @@ The backend local config is not required for the current passive status endpoint
 
 # Browser Smoke-Test Status
 
-The browser smoke test was not completed because `frontend/public/config.js` is missing.
+Playwright opened the local frontend in Microsoft Edge at:
 
-Blocked checklist sections:
+```text
+http://localhost:4200/
+```
+
+Observed public shell state:
+
+- auth screen rendered
+- Supabase runtime config was detected by the UI
+- backend status panel rendered
+- `GET http://localhost:8080/api/status` returned `200`
+- backend status response included `access-control-allow-origin: http://localhost:4200`
+- browser console had no errors or warnings beyond Angular development-mode logging
+
+Authenticated checklist sections were not completed because the automated run did not use Tao's credentials or persisted Supabase session.
+
+Remaining manual checklist sections:
 
 - Auth smoke test
 - New Task smoke test against real Supabase session
@@ -96,9 +113,8 @@ Blocked checklist sections:
 - Save and history smoke test
 - Handoff event persistence smoke test
 - Provider preference persistence smoke test
-- Frontend backend status display with local runtime config
 
-This is a local setup blocker, not an app-code regression.
+This is no longer a missing-config blocker. The remaining risk is authenticated end-to-end behavior after Tao signs in locally.
 
 [Back to Table of Contents](#table-of-contents)
 
@@ -106,36 +122,12 @@ This is a local setup blocker, not an app-code regression.
 
 # Required Next Action
 
-Create `frontend/public/config.js` locally from `frontend/public/config.example.js`.
-
-The file should contain only frontend-safe values:
-
-```js
-window.CHARA_HUB_CONFIG = {
-  supabaseUrl: 'https://your-project-ref.supabase.co',
-  supabasePublishableKey: 'your-publishable-key',
-  backendApiUrl: 'http://localhost:8080'
-};
-```
-
-Then rerun:
-
-```cmd
-cd frontend
-npm.cmd start
-```
-
-Optional backend status check:
-
-```cmd
-cd backend
-cmd /c mvnw.cmd spring-boot:run
-```
-
-Then follow:
+Sign in locally, then follow:
 
 - [MVP Smoke-Test Checklist](mvp-smoke-test-checklist.md)
 - [Backend Status Troubleshooting](backend-status-troubleshooting.md)
+
+Do not paste credentials into docs, commits, screenshots, or chat.
 
 [Back to Table of Contents](#table-of-contents)
 
@@ -151,11 +143,13 @@ After this run record:
 | Supabase API URL | Corrected to use the project API URL, not the dashboard URL. |
 | HTTPS local backend status CORS | Fixed and merged to `main` in `e9ee6e5`. |
 | Login profile sync loop | Fixed and merged to `main` in `e9ee6e5`. |
+| Progress docs after CORS fix | Merged to `main` in `34935be`. |
+| Public browser shell smoke test | Passed on `feature/mvp-browser-smoke-test`. |
 
 Next action:
 
 ```text
-Continue the MVP browser smoke test against the real local Supabase-backed app.
+Complete the authenticated MVP browser smoke test after Tao signs in locally.
 ```
 
 [Back to Table of Contents](#table-of-contents)
@@ -172,6 +166,7 @@ Do not commit:
 - Supabase service role key
 - Supabase secret key
 - cookies, tokens, certificates, credentials
+- `.playwright-cli/` screenshots or browser artifacts
 
 Do not add backend-owned user data flow, JWT validation, or datasource config just to unblock the smoke test.
 
