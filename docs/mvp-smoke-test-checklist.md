@@ -4,6 +4,8 @@ This checklist verifies the current Chara Hub MVP against a real local Supabase-
 
 Use this after automated build/test checks pass. The goal is to find real workflow bugs before calling the MVP ready.
 
+For the latest recorded run, see [MVP Smoke-Test Run](mvp-smoke-test-run.md).
+
 ---
 
 ## Table of Contents
