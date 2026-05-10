@@ -19,6 +19,7 @@ import {
   WORK_MODES,
   WORK_MODE_LABELS,
   ProviderId,
+  ProviderPreference,
   PromptTemplate,
   TaskCategory,
   TaskStatus,
@@ -42,6 +43,7 @@ interface ProviderHandoff {
 type CategoryFilter = TaskCategory | 'ALL';
 type WorkModeFilter = WorkMode | 'ALL';
 type StatusFilter = TaskStatus | 'ALL';
+type WorkModeScope = WorkMode | 'ANY';
 
 const PROVIDER_HANDOFFS: Record<string, Pick<ProviderHandoff, 'url' | 'manualText'>> = {
   chatgpt: {
@@ -74,6 +76,14 @@ const PROVIDER_NAMES: Record<string, string> = {
   codex: 'Codex',
   claude_code: 'Claude Code',
 };
+
+const PROVIDER_IDS: ProviderId[] = [
+  'chatgpt',
+  'claude',
+  'microsoft_copilot',
+  'codex',
+  'claude_code',
+];
 
 const TASK_HISTORY_EVENT_LABELS: Record<string, string> = {
   CREATED: 'Created',
@@ -113,6 +123,12 @@ export class App {
   protected readonly taskDetailMessage = signal('');
   protected readonly promptTemplates = signal<PromptTemplate[]>([]);
   protected readonly promptTemplatesLoading = signal(false);
+  protected readonly providerPreferences = signal<ProviderPreference[]>([]);
+  protected readonly providerPreferencesLoading = signal(false);
+  protected readonly providerPreferenceOrder = signal<ProviderId[]>([]);
+  protected readonly providerPreferenceMessage = signal('');
+  protected readonly providerPreferenceMessageIsError = signal(false);
+  protected readonly providerPreferenceSaving = signal(false);
   protected readonly templateMessage = signal('');
   protected readonly templateMessageIsError = signal(false);
   protected readonly selectedTemplateId = signal('');
@@ -126,6 +142,7 @@ export class App {
   protected readonly taskCategoryLabels = TASK_CATEGORY_LABELS;
   protected readonly taskStatuses = TASK_STATUSES;
   protected readonly taskStatusLabels = TASK_STATUS_LABELS;
+  protected readonly workModeScopes: WorkModeScope[] = ['ANY', ...WORK_MODES];
 
   protected readonly authForm = this.formBuilder.nonNullable.group({
     displayName: [''],
@@ -151,6 +168,11 @@ export class App {
     defaultWorkMode: ['CHARA' as WorkMode],
   });
 
+  protected readonly providerPreferenceForm = this.formBuilder.nonNullable.group({
+    category: ['CODING_LOGICAL' as TaskCategory],
+    workModeScope: ['CHARA_WORK' as WorkModeScope],
+  });
+
   private readonly taskValue = toSignal(
     this.taskForm.valueChanges.pipe(startWith(this.taskForm.getRawValue())),
     {
@@ -173,6 +195,15 @@ export class App {
     this.historyFilterForm.valueChanges.pipe(startWith(this.historyFilterForm.getRawValue())),
     {
       initialValue: this.historyFilterForm.getRawValue(),
+    },
+  );
+
+  private readonly providerPreferenceValue = toSignal(
+    this.providerPreferenceForm.valueChanges.pipe(
+      startWith(this.providerPreferenceForm.getRawValue()),
+    ),
+    {
+      initialValue: this.providerPreferenceForm.getRawValue(),
     },
   );
 
@@ -262,6 +293,26 @@ export class App {
     return this.availablePromptTemplates().find((template) => template.id === selectedId) ?? null;
   });
 
+  protected readonly selectedProviderPreference = computed(() => {
+    const value = this.providerPreferenceValue();
+
+    return (
+      this.providerPreferences().find(
+        (preference) =>
+          preference.category === value.category &&
+          (value.workModeScope === 'ANY'
+            ? preference.work_mode === null
+            : preference.work_mode === value.workModeScope),
+      ) ?? null
+    );
+  });
+
+  protected readonly activeRecommendationPreference = computed(() => {
+    const task = this.taskDraft();
+
+    return this.findProviderPreference(task.category, task.workMode);
+  });
+
   protected readonly classification = computed(() => {
     const task = this.taskDraft();
 
@@ -274,7 +325,11 @@ export class App {
   protected readonly recommendation = computed(() => {
     const task = this.taskDraft();
 
-    return this.recommender.recommend(task.category, task.workMode);
+    return this.recommender.recommend(
+      task.category,
+      task.workMode,
+      this.activeRecommendationPreference()?.provider_order ?? null,
+    );
   });
 
   protected readonly preparedPrompt = computed(() => {
@@ -334,9 +389,12 @@ export class App {
       if (this.auth.signedIn()) {
         void this.loadRecentTasks();
         void this.loadPromptTemplates();
+        void this.loadProviderPreferences();
       } else {
         this.recentTasks.set([]);
         this.promptTemplates.set([]);
+        this.providerPreferences.set([]);
+        this.providerPreferenceOrder.set([]);
         this.selectedTemplateId.set('');
         this.appliedTemplate.set(null);
         this.selectedTaskDetail.set(null);
@@ -357,6 +415,21 @@ export class App {
       if (!this.taskDraft().rawPrompt.trim()) {
         this.taskForm.controls.workMode.setValue(profile.default_work_mode);
       }
+    });
+
+    effect(() => {
+      const value = this.providerPreferenceValue();
+      const preference = this.selectedProviderPreference();
+      const category = value.category ?? 'CODING_LOGICAL';
+      const workModeScope = value.workModeScope ?? 'CHARA_WORK';
+      const fallbackWorkMode: WorkMode =
+        workModeScope === 'ANY' ? this.settingsForm.getRawValue().defaultWorkMode : workModeScope;
+
+      this.providerPreferenceOrder.set(
+        preference?.provider_order ?? this.preferenceDefaultProviderOrder(category, fallbackWorkMode),
+      );
+      this.providerPreferenceMessage.set('');
+      this.providerPreferenceMessageIsError.set(false);
     });
   }
 
@@ -575,6 +648,16 @@ export class App {
     }
   }
 
+  protected async loadProviderPreferences(): Promise<void> {
+    this.providerPreferencesLoading.set(true);
+
+    try {
+      this.providerPreferences.set(await this.taskPersistence.loadProviderPreferences());
+    } finally {
+      this.providerPreferencesLoading.set(false);
+    }
+  }
+
   protected async saveDefaultWorkMode(): Promise<void> {
     if (!this.auth.signedIn()) {
       this.settingsMessage.set('Sign in before saving settings.');
@@ -597,6 +680,66 @@ export class App {
     } finally {
       this.settingsSaving.set(false);
     }
+  }
+
+  protected async saveProviderPreference(): Promise<void> {
+    if (!this.auth.signedIn()) {
+      this.providerPreferenceMessage.set('Sign in before saving provider preferences.');
+      this.providerPreferenceMessageIsError.set(true);
+      return;
+    }
+
+    this.providerPreferenceSaving.set(true);
+
+    try {
+      const value = this.providerPreferenceForm.getRawValue();
+      const result = await this.taskPersistence.saveProviderPreference({
+        category: value.category,
+        workMode: value.workModeScope === 'ANY' ? null : value.workModeScope,
+        providerOrder: this.providerPreferenceOrder(),
+      });
+
+      this.providerPreferenceMessage.set(result.message);
+      this.providerPreferenceMessageIsError.set(!result.ok);
+
+      if (result.ok && result.preference) {
+        this.providerPreferences.update((preferences) => [
+          ...preferences.filter((preference) => preference.id !== result.preference!.id),
+          result.preference!,
+        ]);
+      }
+    } finally {
+      this.providerPreferenceSaving.set(false);
+    }
+  }
+
+  protected moveProviderPreference(providerId: ProviderId, direction: -1 | 1): void {
+    const providerOrder = [...this.providerPreferenceOrder()];
+    const currentIndex = providerOrder.indexOf(providerId);
+    const targetIndex = currentIndex + direction;
+
+    if (currentIndex < 0 || targetIndex < 0 || targetIndex >= providerOrder.length) {
+      return;
+    }
+
+    [providerOrder[currentIndex], providerOrder[targetIndex]] = [
+      providerOrder[targetIndex],
+      providerOrder[currentIndex],
+    ];
+    this.providerPreferenceOrder.set(providerOrder);
+  }
+
+  protected resetProviderPreferenceOrder(): void {
+    const value = this.providerPreferenceForm.getRawValue();
+    const workModeScope = value.workModeScope;
+    const fallbackWorkMode =
+      workModeScope === 'ANY' ? this.settingsForm.getRawValue().defaultWorkMode : workModeScope;
+
+    this.providerPreferenceOrder.set(
+      this.preferenceDefaultProviderOrder(value.category, fallbackWorkMode),
+    );
+    this.providerPreferenceMessage.set('Provider order reset to the default preview.');
+    this.providerPreferenceMessageIsError.set(false);
   }
 
   protected selectTemplate(templateId: string): void {
@@ -688,6 +831,10 @@ export class App {
     return PROVIDER_NAMES[providerId] ?? providerId;
   }
 
+  protected workModeScopeLabel(workModeScope: WorkModeScope): string {
+    return workModeScope === 'ANY' ? 'Any mode' : this.workModeLabels[workModeScope];
+  }
+
   protected historyEventLabel(eventType: string): string {
     return TASK_HISTORY_EVENT_LABELS[eventType] ?? eventType;
   }
@@ -740,6 +887,33 @@ export class App {
         : `Template applied, but history failed: ${result.message}`,
     );
     this.templateMessageIsError.set(!result.ok);
+  }
+
+  private findProviderPreference(
+    category: TaskCategory,
+    workMode: WorkMode,
+  ): ProviderPreference | null {
+    return (
+      this.providerPreferences().find(
+        (preference) => preference.category === category && preference.work_mode === workMode,
+      ) ??
+      this.providerPreferences().find(
+        (preference) => preference.category === category && preference.work_mode === null,
+      ) ??
+      null
+    );
+  }
+
+  private preferenceDefaultProviderOrder(
+    category: TaskCategory,
+    workMode: WorkMode,
+  ): ProviderId[] {
+    const recommendedOrder = this.recommender.defaultProviderOrder(category, workMode);
+    const remainingProviders = PROVIDER_IDS.filter(
+      (providerId) => !recommendedOrder.includes(providerId),
+    );
+
+    return [...recommendedOrder, ...remainingProviders];
   }
 
   private renderTemplate(templateBody: string, task: TaskDraftValue): string {
