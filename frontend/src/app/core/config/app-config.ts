@@ -1,6 +1,7 @@
 export interface CharaHubRuntimeConfig {
   supabaseUrl?: string;
   supabasePublishableKey?: string;
+  backendApiUrl?: string;
 }
 
 declare global {
@@ -17,5 +18,11 @@ export function hasSupabaseConfig(): boolean {
   const config = getRuntimeConfig();
 
   return Boolean(config.supabaseUrl && config.supabasePublishableKey);
+}
+
+export function getBackendApiUrl(): string | null {
+  const backendApiUrl = getRuntimeConfig().backendApiUrl?.trim();
+
+  return backendApiUrl ? backendApiUrl.replace(/\/$/, '') : null;
 }
 

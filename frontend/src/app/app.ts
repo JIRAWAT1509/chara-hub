@@ -4,6 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
 
 import { AuthMode, AuthService } from './core/auth/auth.service';
+import { BackendStatusService } from './core/backend/backend-status.service';
 import { TaskClassifierService } from './core/classification/task-classifier.service';
 import { ProviderRecommendationService } from './core/recommendation/provider-recommendation.service';
 import {
@@ -105,6 +106,7 @@ export class App {
   private readonly classifier = inject(TaskClassifierService);
   private readonly recommender = inject(ProviderRecommendationService);
   private readonly taskPersistence = inject(TaskPersistenceService);
+  protected readonly backendStatus = inject(BackendStatusService);
   protected readonly auth = inject(AuthService);
   protected readonly mode = signal<AuthMode>('sign-in');
   protected readonly message = signal('');
@@ -379,6 +381,8 @@ export class App {
   );
 
   constructor() {
+    void this.backendStatus.loadStatus();
+
     this.taskForm.valueChanges.subscribe(() => {
       this.activeTaskId.set(null);
       this.handoffMessage.set('');

@@ -765,6 +765,26 @@
       <span>Supabase Auth</span>
       <span>RLS-backed schema</span>
       <span>Local classifier</span>
+
+      @if (backendStatus.state(); as state) {
+        @if (state.status) {
+          <span>Backend: {{ state.status.mode }}</span>
+          <span>Data flow: {{ state.status.ownsUserDataFlow ? 'Backend-owned' : 'Frontend-owned' }}</span>
+        } @else {
+          <span>Backend: {{ state.message }}</span>
+        }
+
+        @if (state.configured) {
+          <button
+            class="text-button"
+            type="button"
+            (click)="backendStatus.loadStatus()"
+            [disabled]="state.loading"
+          >
+            {{ state.loading ? 'Checking...' : 'Refresh backend' }}
+          </button>
+        }
+      }
     </div>
   </aside>
 </main>
