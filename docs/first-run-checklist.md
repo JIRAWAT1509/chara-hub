@@ -8,6 +8,8 @@ For readiness status, see the [MVP Readiness Review](mvp-readiness-review.md).
 
 For end-to-end manual validation, use the [MVP Smoke-Test Checklist](mvp-smoke-test-checklist.md).
 
+If a smoke-test run is blocked, check [MVP Smoke-Test Run](mvp-smoke-test-run.md).
+
 ---
 
 ## Table of Contents

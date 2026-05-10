@@ -58,6 +58,8 @@ The main remaining work is not a new backend architecture. The main remaining wo
 
 Use the [MVP Smoke-Test Checklist](mvp-smoke-test-checklist.md) for that manual validation pass.
 
+The first recorded run is available in [MVP Smoke-Test Run](mvp-smoke-test-run.md).
+
 [Back to Table of Contents](#table-of-contents)
 
 ---
