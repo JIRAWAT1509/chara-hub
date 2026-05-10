@@ -12,9 +12,10 @@ The frontend is responsible for the user-facing Hub mode experience, including t
 2. [Tech Stack](#tech-stack)
 3. [Development Server](#development-server)
 4. [Runtime Config](#runtime-config)
-5. [Build](#build)
-6. [Tests](#tests)
-7. [Project Boundary](#project-boundary)
+5. [Local Development Guide](#local-development-guide)
+6. [Build](#build)
+7. [Tests](#tests)
+8. [Project Boundary](#project-boundary)
 
 ---
 
@@ -109,6 +110,16 @@ window.CHARA_HUB_CONFIG = {
 ```
 
 `backendApiUrl` is optional. When it is missing, the frontend shows that backend status is not configured and keeps the Hub workflow usable.
+
+[Back to Table of Contents](#table-of-contents)
+
+---
+
+# Local Development Guide
+
+For full local setup, backend status wiring, verification commands, and Git safety, see:
+
+- [Local Development Guide](../docs/local-dev-guide.md)
 
 [Back to Table of Contents](#table-of-contents)
 
