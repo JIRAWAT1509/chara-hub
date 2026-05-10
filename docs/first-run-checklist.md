@@ -4,6 +4,8 @@ This checklist is the short path for getting Chara Hub running locally for the f
 
 For detailed explanations, use the full [Local Development Guide](local-dev-guide.md).
 
+For readiness status, see the [MVP Readiness Review](mvp-readiness-review.md).
+
 ---
 
 ## Table of Contents
