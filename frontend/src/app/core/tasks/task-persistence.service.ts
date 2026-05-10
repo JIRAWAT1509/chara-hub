@@ -5,6 +5,7 @@ import { ClassificationResult } from '../classification/task-classifier.service'
 import { ProviderRecommendationPreview } from '../recommendation/provider-recommendation.service';
 import {
   ProviderId,
+  ProviderPreference,
   ProviderRecommendation,
   PromptTemplate,
   Task,
@@ -56,6 +57,18 @@ export interface TaskDetail {
   task: Task;
   recommendation: ProviderRecommendation | null;
   history: TaskHistory[];
+}
+
+export interface SaveProviderPreferenceInput {
+  category: TaskCategory;
+  workMode: WorkMode | null;
+  providerOrder: ProviderId[];
+}
+
+export interface SaveProviderPreferenceResult {
+  ok: boolean;
+  message: string;
+  preference?: ProviderPreference;
 }
 
 @Injectable({
@@ -281,6 +294,92 @@ export class TaskPersistenceService {
     }
 
     return data as unknown as PromptTemplate[];
+  }
+
+  async loadProviderPreferences(): Promise<ProviderPreference[]> {
+    const client = this.auth.supabaseClient;
+    const userId = this.auth.user()?.id;
+
+    if (!client || !userId) {
+      return [];
+    }
+
+    const { data, error } = await client
+      .from('provider_preferences')
+      .select('id,user_profile_id,category,work_mode,provider_order,created_at,updated_at')
+      .eq('user_profile_id', userId)
+      .order('category', { ascending: true })
+      .order('work_mode', { ascending: true });
+
+    if (error || !data) {
+      return [];
+    }
+
+    return data as unknown as ProviderPreference[];
+  }
+
+  async saveProviderPreference(
+    input: SaveProviderPreferenceInput,
+  ): Promise<SaveProviderPreferenceResult> {
+    const client = this.auth.supabaseClient;
+    const userId = this.auth.user()?.id;
+
+    if (!client || !userId) {
+      return {
+        ok: false,
+        message: 'Sign in and configure Supabase before saving provider preferences.',
+      };
+    }
+
+    if (!input.providerOrder.length) {
+      return {
+        ok: false,
+        message: 'Choose at least one provider.',
+      };
+    }
+
+    let existingPreferenceQuery = client
+      .from('provider_preferences')
+      .select('id')
+      .eq('user_profile_id', userId)
+      .eq('category', input.category);
+
+    existingPreferenceQuery = input.workMode
+      ? existingPreferenceQuery.eq('work_mode', input.workMode)
+      : existingPreferenceQuery.is('work_mode', null);
+
+    const { data: existingPreference } = await existingPreferenceQuery.maybeSingle();
+
+    const preferencePayload = {
+      user_profile_id: userId,
+      category: input.category,
+      work_mode: input.workMode,
+      provider_order: input.providerOrder,
+    };
+
+    const preferenceMutation = existingPreference
+      ? client
+          .from('provider_preferences')
+          .update({ provider_order: input.providerOrder })
+          .eq('id', existingPreference.id)
+      : client.from('provider_preferences').insert(preferencePayload);
+
+    const { data, error } = await preferenceMutation
+      .select('id,user_profile_id,category,work_mode,provider_order,created_at,updated_at')
+      .single();
+
+    if (error || !data) {
+      return {
+        ok: false,
+        message: error?.message ?? 'Provider preference was not saved.',
+      };
+    }
+
+    return {
+      ok: true,
+      message: 'Provider preference saved.',
+      preference: data as unknown as ProviderPreference,
+    };
   }
 
   async recordTaskHistoryEvent(input: RecordTaskHistoryEventInput): Promise<SaveTaskResult> {
