@@ -1,0 +1,75 @@
+<section class="dashboard-summary" aria-label="Workflow summary">
+  <div class="dashboard-grid">
+    <article class="summary-tile">
+      <span>Mode</span>
+      <strong>{{ workModeLabels[defaultWorkMode()] }}</strong>
+      <small>{{ activeWorkflowStatus() }}</small>
+    </article>
+
+    <article class="summary-tile">
+      <span>Recent tasks</span>
+      <strong>{{ recentTaskCount() }}</strong>
+      <small>{{ visibleTaskCount() }} visible</small>
+    </article>
+
+    <article class="summary-tile">
+      <span>Handoffs</span>
+      <strong>{{ sentTaskCount() }}</strong>
+      <small>{{ preparedTaskCount() }} prepared</small>
+    </article>
+
+    <article class="summary-tile">
+      <span>Templates</span>
+      <strong>{{ availableTemplateCount() }}</strong>
+      <small>{{ templateCount() }} loaded</small>
+    </article>
+  </div>
+
+  <div class="workspace-header">
+    <div class="detail-block">
+      <p class="eyebrow">Latest task</p>
+
+      @if (latestTask(); as task) {
+        <h3>{{ task.title || 'Untitled task' }}</h3>
+        <div class="detail-meta">
+          <span>{{ taskStatusLabels[task.status] }}</span>
+          <span>{{ taskCategoryLabels[task.category] }}</span>
+          <span>{{ workModeLabels[task.work_mode] }}</span>
+        </div>
+      } @else {
+        <p class="subtle-note">No saved tasks yet.</p>
+      }
+    </div>
+
+    <nav class="dashboard-actions" aria-label="Workspace shortcuts">
+      <button
+        class="secondary-button"
+        type="button"
+        (click)="shortcutSelected.emit('new-task')"
+      >
+        New Task
+      </button>
+      <button
+        class="secondary-button"
+        type="button"
+        (click)="shortcutSelected.emit('templates')"
+      >
+        Templates
+      </button>
+      <button
+        class="secondary-button"
+        type="button"
+        (click)="shortcutSelected.emit('history')"
+      >
+        History
+      </button>
+      <button
+        class="secondary-button"
+        type="button"
+        (click)="shortcutSelected.emit('settings')"
+      >
+        Settings
+      </button>
+    </nav>
+  </div>
+</section>

@@ -1,10 +1,9 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, ViewEncapsulation, computed, effect, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
 
 import { AuthMode, AuthService } from './core/auth/auth.service';
-import { BackendStatusService } from './core/backend/backend-status.service';
 import { TaskClassifierService } from './core/classification/task-classifier.service';
 import { ProviderRecommendationService } from './core/recommendation/provider-recommendation.service';
 import {
@@ -26,6 +25,9 @@ import {
   TaskStatus,
   WorkMode,
 } from './core/models';
+import { BrandHeaderComponent } from './shared/brand-header/brand-header.component';
+import { BuildContextPanelComponent } from './shared/build-context-panel/build-context-panel.component';
+import { DashboardSummaryComponent } from './shared/dashboard-summary/dashboard-summary.component';
 
 interface TaskDraftValue {
   title: string;
@@ -97,16 +99,21 @@ const TASK_HISTORY_EVENT_LABELS: Record<string, string> = {
 
 @Component({
   selector: 'app-root',
-  imports: [ReactiveFormsModule],
+  imports: [
+    ReactiveFormsModule,
+    BrandHeaderComponent,
+    BuildContextPanelComponent,
+    DashboardSummaryComponent,
+  ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
+  encapsulation: ViewEncapsulation.None,
 })
 export class App {
   private readonly formBuilder = inject(FormBuilder);
   private readonly classifier = inject(TaskClassifierService);
   private readonly recommender = inject(ProviderRecommendationService);
   private readonly taskPersistence = inject(TaskPersistenceService);
-  protected readonly backendStatus = inject(BackendStatusService);
   protected readonly auth = inject(AuthService);
   protected readonly mode = signal<AuthMode>('sign-in');
   protected readonly message = signal('');
@@ -414,8 +421,6 @@ export class App {
   );
 
   constructor() {
-    void this.backendStatus.loadStatus();
-
     this.taskForm.valueChanges.subscribe(() => {
       this.activeTaskId.set(null);
       this.handoffMessage.set('');

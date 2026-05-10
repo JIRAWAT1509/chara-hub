@@ -316,6 +316,7 @@ Use the local development guide for setup, safe config files, frontend/backend c
 - [MVP Readiness Review](docs/mvp-readiness-review.md)
 - [MVP Smoke-Test Checklist](docs/mvp-smoke-test-checklist.md)
 - [MVP Smoke-Test Run](docs/mvp-smoke-test-run.md)
+- [Frontend Component Split Plan](docs/frontend-component-split-plan.md)
 
 [Back to Table of Contents](#table-of-contents)
 
@@ -364,6 +365,7 @@ Implemented so far:
 24. MVP smoke-test run record: authenticated workflow passed after fixing task action readiness.
 25. HTTPS local backend status CORS.
 26. Login profile sync loop fix after local browser smoke testing.
+27. First frontend component split for brand header, dashboard summary, and build context panel.
 ```
 
 Recommended next implementation order:
@@ -371,7 +373,7 @@ Recommended next implementation order:
 ```text
 1. Keep JWT validation deferred until the backend owns a protected endpoint.
 2. Add JWT validation before any backend endpoint owns user data.
-3. Plan the frontend component split now that the MVP browser smoke test is stable.
+3. Continue behavior-preserving frontend component splits.
 4. Keep routing optional until the component boundaries are clean.
 5. Move recommendation policy server-side only when frontend rules become hard to manage.
 ```

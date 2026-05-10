@@ -1,0 +1,88 @@
+# Frontend Component Split Plan
+
+This document records the first frontend component split after the authenticated MVP smoke test passed.
+
+The goal is to reduce risk in `app.ts` and `app.html` without changing product behavior, adding routes, or starting a design-system migration.
+
+---
+
+## Current Slice
+
+Branch:
+
+```text
+feature/frontend-component-split-plan
+```
+
+First extracted components:
+
+| Component | Responsibility |
+| --- | --- |
+| `BrandHeaderComponent` | Renders the Chara Hub title and runtime config status. |
+| `DashboardSummaryComponent` | Renders signed-in dashboard counts, latest task, and workspace shortcuts. |
+| `BuildContextPanelComponent` | Renders build/backend status and owns passive backend status refresh. |
+
+`App` still owns the forms, signals, persistence calls, task workflow, and page orchestration.
+
+---
+
+## Why This Split
+
+This is intentionally a small structural slice:
+
+- it avoids changing the user workflow
+- it keeps Supabase/Auth/task persistence logic in one place for now
+- it proves component boundaries before splitting larger forms
+- it keeps Angular Router deferred
+- it avoids combining the split with PrimeNG or Tailwind migration
+
+`App` now uses `ViewEncapsulation.None` so the existing shell styles continue to apply after moving markup into child components. This preserves visual behavior during the first split.
+
+---
+
+## Verified
+
+Commands/checks:
+
+| Check | Result |
+| --- | --- |
+| `cd frontend && npm.cmd test -- --watch=false` | Passed: 1 test file, 3 tests |
+| `cd frontend && npm.cmd run build` | Passed |
+| Playwright public shell at `http://localhost:4200/` | Passed |
+| Browser console | No application errors or warnings |
+| Backend status request | `GET http://localhost:8080/api/status` returned `200` |
+
+Frontend build output:
+
+```text
+Initial total: 442.09 kB raw / 106.43 kB estimated transfer
+```
+
+---
+
+## Next Split Candidates
+
+Recommended order:
+
+1. Extract auth form.
+2. Extract new task form and result panels.
+3. Extract template and handoff panels.
+4. Extract settings/provider preferences.
+5. Extract history list and task detail.
+
+Keep each extraction behavior-preserving. Run build, tests, and a browser smoke test after each meaningful slice.
+
+---
+
+## Boundaries
+
+Do not add in this slice:
+
+- Angular Router navigation
+- PrimeNG
+- Tailwind
+- backend-owned user data flow
+- JWT validation
+- database migrations
+
+Those are separate decisions.
