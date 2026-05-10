@@ -14,6 +14,7 @@ node_modules/
 .angular/
 dist/
 coverage/
+.playwright-cli/
 
 # Backend
 target/

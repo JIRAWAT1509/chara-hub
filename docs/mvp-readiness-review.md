@@ -1,6 +1,6 @@
 # MVP Readiness Review
 
-This review records the current MVP readiness state for Chara Hub after the first-run and backend status troubleshooting slices.
+This review records the current MVP readiness state for Chara Hub after the first-run, backend status troubleshooting, and public browser smoke-test slices.
 
 The purpose is to decide what is actually blocking an MVP handoff, without prematurely moving user data flow behind Spring Boot.
 
@@ -36,7 +36,7 @@ Chara Hub is close to MVP-ready for local personal use.
 Current readiness:
 
 ```text
-MVP readiness: 90-95%
+MVP readiness: 92-96%
 ```
 
 The core Hub loop is implemented:
@@ -54,7 +54,7 @@ Sign in
 -> reuse previous task
 ```
 
-The main remaining work is not a new backend architecture. The main remaining work is a focused manual smoke test and small bug-fix pass against the real local Supabase project.
+The main remaining work is not a new backend architecture. The main remaining work is completing the authenticated smoke test and doing a small bug-fix pass against the real local Supabase project.
 
 Use the [MVP Smoke-Test Checklist](mvp-smoke-test-checklist.md) for that manual validation pass.
 
@@ -72,19 +72,29 @@ Commands run:
 | --- | --- |
 | `cd frontend && npm.cmd run build` | Passed |
 | `cd frontend && npm.cmd test -- --watch=false` | Passed: 1 test file, 2 tests |
-| `cd backend && cmd /c mvnw.cmd test` | Passed: 3 tests |
+| `cd backend && cmd /c mvnw.cmd test` | Passed: 4 tests |
+| Playwright public browser shell at `http://localhost:4200/` | Passed |
 
 Frontend production build:
 
 ```text
-Initial total: 441.08 kB raw / 105.40 kB estimated transfer
+Initial total: 441.15 kB raw / 105.44 kB estimated transfer
 ```
 
 Backend tests include:
 
 - application context load
 - passive backend status response
-- local frontend CORS for `/api/status`
+- HTTP local frontend CORS for `/api/status`
+- HTTPS local frontend CORS for `/api/status`
+
+Browser smoke coverage so far:
+
+- auth screen rendered
+- Supabase runtime config detected
+- backend status panel rendered
+- `GET http://localhost:8080/api/status` returned `200`
+- no browser console errors or warnings beyond Angular development-mode logging
 
 [Back to Table of Contents](#table-of-contents)
 
@@ -116,10 +126,10 @@ These should be checked before calling the MVP done:
 
 | Blocker | Why It Matters | Recommended Action |
 | --- | --- | --- |
-| Real Supabase smoke test | Automated tests do not prove real Auth/RLS/config behavior. | Run the app against Tao's local `config.js` and manually test the full workflow. |
+| Authenticated Supabase smoke test | Automated tests and public shell checks do not prove signed-in Auth/RLS data behavior. | Sign in locally and manually test the full workflow. |
 | Manual saved-task flow check | Core value depends on save/history/reuse behaving correctly. | Create a task, save it, copy/open handoff, inspect timeline, then reuse it. |
 | Provider preference persistence check | Recent work touched preference save/reset/refresh behavior. | Change provider order, save, refresh, and confirm recommendation order persists. |
-| Backend status browser check | Unit tests prove CORS behavior, but not Tao's local browser/config state. | Run backend and frontend, set `backendApiUrl`, and confirm passive status appears. |
+| Backend status browser check | Public HTTP browser check passed; HTTPS remains useful if Tao runs the dev server over HTTPS. | Recheck only if switching the frontend origin to HTTPS or a different port. |
 
 These are validation blockers, not architecture blockers.
 
@@ -147,20 +157,20 @@ These should remain deferred unless a concrete need appears:
 
 # Recommended Next Slice
 
-Recommended next branch:
+Recommended next branch after merging the smoke-test record:
 
 ```text
-feature/mvp-browser-smoke-test
+feature/authenticated-smoke-test-fixes
 ```
 
 Recommended scope:
 
-1. Continue the manual smoke-test checklist against Tao's real local Supabase-backed app.
+1. Complete the authenticated manual smoke-test checklist against Tao's real local Supabase-backed app.
 2. Record pass/fail notes.
 3. Fix only bugs found during the smoke test.
 4. Plan frontend component/route splitting only after the browser smoke test is stable.
 
-This is the right next step because the code already builds and tests pass. The remaining risk is whether the real local flow works cleanly end to end.
+This is the right next step because the code already builds, tests pass, and the public shell/backend-status path works. The remaining risk is whether the signed-in local flow works cleanly end to end.
 
 [Back to Table of Contents](#table-of-contents)
 
