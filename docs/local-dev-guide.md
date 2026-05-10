@@ -2,6 +2,8 @@
 
 This guide explains how to run Chara Hub locally without committing secrets or accidentally changing the project architecture.
 
+For a shorter setup path, use the [First-Run Checklist](first-run-checklist.md).
+
 ---
 
 ## Table of Contents

@@ -120,6 +120,7 @@ window.CHARA_HUB_CONFIG = {
 
 For full local setup, backend status wiring, verification commands, and Git safety, see:
 
+- [First-Run Checklist](../docs/first-run-checklist.md)
 - [Local Development Guide](../docs/local-dev-guide.md)
 
 [Back to Table of Contents](#table-of-contents)
