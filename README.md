@@ -177,6 +177,7 @@ Planned MVP features:
 | Lightweight dashboard summary | Implemented |
 | Provider preference settings | Implemented |
 | Backend status endpoint | Implemented |
+| Frontend backend status display | Implemented |
 | Backend-owned user data flow | Deferred |
 
 The most important MVP screen is the New Task workspace because it proves the core product loop.
@@ -326,6 +327,7 @@ Implemented so far:
 13. Lightweight dashboard summary.
 14. Provider preference settings.
 15. Backend status endpoint and activation decision.
+16. Frontend backend status display.
 ```
 
 Recommended next implementation order:

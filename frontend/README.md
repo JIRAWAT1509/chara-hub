@@ -11,9 +11,10 @@ The frontend is responsible for the user-facing Hub mode experience, including t
 1. [What This Frontend Does](#what-this-frontend-does)
 2. [Tech Stack](#tech-stack)
 3. [Development Server](#development-server)
-4. [Build](#build)
-5. [Tests](#tests)
-6. [Project Boundary](#project-boundary)
+4. [Runtime Config](#runtime-config)
+5. [Build](#build)
+6. [Tests](#tests)
+7. [Project Boundary](#project-boundary)
 
 ---
 
@@ -52,6 +53,7 @@ Current implemented frontend scope:
 | Built-in template application | Implemented |
 | Basic default work mode setting | Implemented |
 | Bundle budget cleanup | Implemented |
+| Backend status display | Implemented |
 
 [Back to Table of Contents](#table-of-contents)
 
@@ -86,6 +88,26 @@ The app should run at:
 ```text
 http://localhost:4200/
 ```
+
+[Back to Table of Contents](#table-of-contents)
+
+---
+
+# Runtime Config
+
+The app reads runtime config from `public/config.js`.
+
+Safe frontend values:
+
+```js
+window.CHARA_HUB_CONFIG = {
+  supabaseUrl: 'https://your-project-ref.supabase.co',
+  supabasePublishableKey: 'your-publishable-key',
+  backendApiUrl: 'http://localhost:8080'
+};
+```
+
+`backendApiUrl` is optional. When it is missing, the frontend shows that backend status is not configured and keeps the Hub workflow usable.
 
 [Back to Table of Contents](#table-of-contents)
 
