@@ -48,6 +48,7 @@ Meaning:
 
 - Spring Boot can run.
 - Spring Boot exposes a small status/capability endpoint.
+- The Angular frontend can display backend status when `backendApiUrl` is configured.
 - Spring Boot does not validate user JWTs yet.
 - Spring Boot does not connect directly to Supabase Postgres yet.
 - Spring Boot does not replace frontend Supabase reads/writes yet.
@@ -88,7 +89,7 @@ Purpose:
 - prove the backend can expose a stable API
 - document that the backend is intentionally passive
 - advertise future activation criteria
-- provide a simple integration point for later frontend/backend checks
+- provide a simple integration point for frontend/backend checks
 
 This endpoint does not require secrets, database config, or authentication.
 
@@ -138,9 +139,10 @@ Frontend may continue to use:
 Recommended order:
 
 1. Keep `/api/status` as the first backend contract.
-2. Add frontend backend-status display only if it helps local development.
-3. Add JWT validation before any backend endpoint reads or writes user-owned data.
-4. Move recommendation policy server-side only when frontend rules become hard to manage.
-5. Add database access only when the backend owns a real workflow.
+2. Keep the frontend backend-status display lightweight and optional.
+3. Decide whether JWT validation is worth implementing now.
+4. Add JWT validation before any backend endpoint reads or writes user-owned data.
+5. Move recommendation policy server-side only when frontend rules become hard to manage.
+6. Add database access only when the backend owns a real workflow.
 
 [Back to Table of Contents](#table-of-contents)

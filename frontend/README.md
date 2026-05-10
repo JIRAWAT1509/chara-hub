@@ -52,6 +52,7 @@ Current implemented frontend scope:
 | Task detail and timeline | Implemented |
 | Built-in template application | Implemented |
 | Basic default work mode setting | Implemented |
+| Provider preference settings | Implemented |
 | Bundle budget cleanup | Implemented |
 | Backend status display | Implemented |
 
