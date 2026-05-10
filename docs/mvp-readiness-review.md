@@ -1,6 +1,6 @@
 # MVP Readiness Review
 
-This review records the current MVP readiness state for Chara Hub after the first-run, backend status troubleshooting, and public browser smoke-test slices.
+This review records the current MVP readiness state for Chara Hub after the first-run, backend status troubleshooting, public browser smoke-test, and authenticated browser smoke-test slices.
 
 The purpose is to decide what is actually blocking an MVP handoff, without prematurely moving user data flow behind Spring Boot.
 
@@ -22,7 +22,7 @@ The purpose is to decide what is actually blocking an MVP handoff, without prema
 # Review Date
 
 ```text
-2026-05-10
+2026-05-11
 ```
 
 [Back to Table of Contents](#table-of-contents)
@@ -36,7 +36,7 @@ Chara Hub is close to MVP-ready for local personal use.
 Current readiness:
 
 ```text
-MVP readiness: 92-96%
+MVP readiness: 96-98%
 ```
 
 The core Hub loop is implemented:
@@ -54,9 +54,9 @@ Sign in
 -> reuse previous task
 ```
 
-The main remaining work is not a new backend architecture. The main remaining work is completing the authenticated smoke test and doing a small bug-fix pass against the real local Supabase project.
+The main remaining work is not a new backend architecture. The main remaining work is keeping the MVP stable while splitting the large Angular shell into clearer components.
 
-Use the [MVP Smoke-Test Checklist](mvp-smoke-test-checklist.md) for that manual validation pass.
+Use the [MVP Smoke-Test Checklist](mvp-smoke-test-checklist.md) for future regression checks.
 
 The first recorded run is available in [MVP Smoke-Test Run](mvp-smoke-test-run.md).
 
@@ -71,14 +71,15 @@ Commands run:
 | Command | Result |
 | --- | --- |
 | `cd frontend && npm.cmd run build` | Passed |
-| `cd frontend && npm.cmd test -- --watch=false` | Passed: 1 test file, 2 tests |
+| `cd frontend && npm.cmd test -- --watch=false` | Passed: 1 test file, 3 tests |
 | `cd backend && cmd /c mvnw.cmd test` | Passed: 4 tests |
 | Playwright public browser shell at `http://localhost:4200/` | Passed |
+| Playwright authenticated workflow at `http://localhost:4200/` | Passed after fixing task action readiness |
 
 Frontend production build:
 
 ```text
-Initial total: 441.15 kB raw / 105.44 kB estimated transfer
+Initial total: 441.22 kB raw / 105.41 kB estimated transfer
 ```
 
 Backend tests include:
@@ -95,6 +96,14 @@ Browser smoke coverage so far:
 - backend status panel rendered
 - `GET http://localhost:8080/api/status` returned `200`
 - no browser console errors or warnings beyond Angular development-mode logging
+- signed-in dashboard loaded
+- task category detection and provider recommendation updated from task input
+- template selection and application worked
+- task save created task, recommendation, and history records
+- saved task detail and timeline loaded
+- copy handoff recorded a history event and marked the task as sent
+- reuse loaded the saved task back into the task form
+- provider preference save changed the active recommendation, then reset/save restored default order
 
 [Back to Table of Contents](#table-of-contents)
 
@@ -122,16 +131,15 @@ Browser smoke coverage so far:
 
 # Remaining MVP Blockers
 
-These should be checked before calling the MVP done:
+These are the remaining risks before broader usage:
 
 | Blocker | Why It Matters | Recommended Action |
 | --- | --- | --- |
-| Authenticated Supabase smoke test | Automated tests and public shell checks do not prove signed-in Auth/RLS data behavior. | Sign in locally and manually test the full workflow. |
-| Manual saved-task flow check | Core value depends on save/history/reuse behaving correctly. | Create a task, save it, copy/open handoff, inspect timeline, then reuse it. |
-| Provider preference persistence check | Recent work touched preference save/reset/refresh behavior. | Change provider order, save, refresh, and confirm recommendation order persists. |
+| Large single Angular shell | The MVP works, but `app.ts` / `app.html` are too large for safe ongoing UI work. | Plan a component split before adding more frontend features. |
+| Smoke-test data cleanup | The authenticated run created one task titled `Smoke test task`. | Keep it as test evidence or remove it manually later if the UI gets delete support. |
 | Backend status browser check | Public HTTP browser check passed; HTTPS remains useful if Tao runs the dev server over HTTPS. | Recheck only if switching the frontend origin to HTTPS or a different port. |
 
-These are validation blockers, not architecture blockers.
+These are maintenance risks, not architecture blockers.
 
 [Back to Table of Contents](#table-of-contents)
 
@@ -157,20 +165,20 @@ These should remain deferred unless a concrete need appears:
 
 # Recommended Next Slice
 
-Recommended next branch after merging the smoke-test record:
+Recommended next branch after merging the authenticated smoke-test fixes:
 
 ```text
-feature/authenticated-smoke-test-fixes
+feature/frontend-component-split-plan
 ```
 
 Recommended scope:
 
-1. Complete the authenticated manual smoke-test checklist against Tao's real local Supabase-backed app.
-2. Record pass/fail notes.
-3. Fix only bugs found during the smoke test.
-4. Plan frontend component/route splitting only after the browser smoke test is stable.
+1. Identify stable component boundaries in the current single-shell UI.
+2. Split components without changing product behavior.
+3. Keep Angular Router deferred unless real route-level navigation is chosen.
+4. Run the same build/test/browser smoke checks after the split.
 
-This is the right next step because the code already builds, tests pass, and the public shell/backend-status path works. The remaining risk is whether the signed-in local flow works cleanly end to end.
+This is the right next step because the code builds, tests pass, public shell/backend-status works, and the signed-in local flow works end to end.
 
 [Back to Table of Contents](#table-of-contents)
 
