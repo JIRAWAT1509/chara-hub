@@ -177,9 +177,11 @@ Current MVP features:
 | Bundle budget cleanup | Implemented |
 | Lightweight dashboard summary | Implemented |
 | Provider preference settings | Implemented |
+| Provider preference refresh and dirty-state polish | Implemented |
 | Backend status endpoint | Implemented |
 | Frontend backend status display | Implemented |
 | JWT backend decision | Implemented |
+| Local development guide | Implemented |
 | Backend-owned user data flow | Deferred |
 
 The most important MVP screen is the New Task workspace because it proves the core product loop.
@@ -342,6 +344,7 @@ Implemented so far:
 16. Frontend backend status display.
 17. JWT backend decision.
 18. Local development guide.
+19. Provider preference refresh and dirty-state polish.
 ```
 
 Recommended next implementation order:
@@ -349,8 +352,9 @@ Recommended next implementation order:
 ```text
 1. Keep JWT validation deferred until the backend owns a protected endpoint.
 2. Add JWT validation before any backend endpoint owns user data.
-3. Improve local development ergonomics or polish the single-shell workflow.
-4. Move recommendation policy server-side only when frontend rules become hard to manage.
+3. Add a first-run checklist so local setup and verification are repeatable.
+4. Add backend status troubleshooting if local backend setup becomes noisy.
+5. Move recommendation policy server-side only when frontend rules become hard to manage.
 ```
 
 The project intentionally stays small. The goal is to make the core workflow useful before adding desktop shells, local agents, or advanced automation.
