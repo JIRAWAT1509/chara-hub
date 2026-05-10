@@ -54,6 +54,7 @@ Current implemented frontend scope:
 | Built-in template application | Implemented |
 | Basic default work mode setting | Implemented |
 | Provider preference settings | Implemented |
+| Provider preference refresh and dirty-state polish | Implemented |
 | Bundle budget cleanup | Implemented |
 | Backend status display | Implemented |
 

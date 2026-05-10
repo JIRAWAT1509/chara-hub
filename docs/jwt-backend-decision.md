@@ -123,14 +123,13 @@ Do not add datasource config, repositories, or service role keys in the same sli
 Recommended next product slice:
 
 ```text
-Improve local development ergonomics or polish the single-shell workflow.
+Keep JWT deferred, then improve onboarding and local troubleshooting around the current single-shell workflow.
 ```
 
 Good candidates:
 
-- backend/frontend local run guide
 - backend status dev troubleshooting
 - first-run setup checklist
-- small UI polish for provider preference settings
+- lightweight docs or UI polish only where it reduces setup friction
 
 [Back to Table of Contents](#table-of-contents)
