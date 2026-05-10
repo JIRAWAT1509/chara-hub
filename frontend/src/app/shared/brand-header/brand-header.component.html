@@ -1,0 +1,10 @@
+<div class="brand-row">
+  <div>
+    <p class="eyebrow">Chara Hub</p>
+    <h1>AI work starts here.</h1>
+  </div>
+
+  <div class="status-pill" [class.ready]="configReady()">
+    {{ configReady() ? 'Supabase ready' : 'Config needed' }}
+  </div>
+</div>

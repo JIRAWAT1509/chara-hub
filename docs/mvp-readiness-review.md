@@ -75,6 +75,7 @@ Commands run:
 | `cd backend && cmd /c mvnw.cmd test` | Passed: 4 tests |
 | Playwright public browser shell at `http://localhost:4200/` | Passed |
 | Playwright authenticated workflow at `http://localhost:4200/` | Passed after fixing task action readiness |
+| First frontend component split public shell check | Passed |
 
 Frontend production build:
 
@@ -104,6 +105,7 @@ Browser smoke coverage so far:
 - copy handoff recorded a history event and marked the task as sent
 - reuse loaded the saved task back into the task form
 - provider preference save changed the active recommendation, then reset/save restored default order
+- first component split kept the public auth shell and backend status panel rendering correctly
 
 [Back to Table of Contents](#table-of-contents)
 
@@ -135,7 +137,7 @@ These are the remaining risks before broader usage:
 
 | Blocker | Why It Matters | Recommended Action |
 | --- | --- | --- |
-| Large single Angular shell | The MVP works, but `app.ts` / `app.html` are too large for safe ongoing UI work. | Plan a component split before adding more frontend features. |
+| Large single Angular shell | The MVP works, but `app.ts` / `app.html` are still too large for safe ongoing UI work. | Continue behavior-preserving component splits. |
 | Smoke-test data cleanup | The authenticated run created one task titled `Smoke test task`. | Keep it as test evidence or remove it manually later if the UI gets delete support. |
 | Backend status browser check | Public HTTP browser check passed; HTTPS remains useful if Tao runs the dev server over HTTPS. | Recheck only if switching the frontend origin to HTTPS or a different port. |
 
@@ -165,16 +167,16 @@ These should remain deferred unless a concrete need appears:
 
 # Recommended Next Slice
 
-Recommended next branch after merging the authenticated smoke-test fixes:
+Recommended next branch after merging the first component split:
 
 ```text
-feature/frontend-component-split-plan
+feature/frontend-task-workspace-split
 ```
 
 Recommended scope:
 
-1. Identify stable component boundaries in the current single-shell UI.
-2. Split components without changing product behavior.
+1. Extract the New Task form and result panels.
+2. Preserve the existing task workflow behavior.
 3. Keep Angular Router deferred unless real route-level navigation is chosen.
 4. Run the same build/test/browser smoke checks after the split.
 
