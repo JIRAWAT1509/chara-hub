@@ -35,6 +35,20 @@ Second extracted components:
 | `NewTaskFormComponent` | Renders task title, prompt, work mode, category controls, and prompt character count. |
 | `TaskRoutingResultsComponent` | Renders detected category and provider recommendation result panels, including preference notes and alternatives. |
 
+Third branch:
+
+```text
+feature/frontend-template-handoff-split
+```
+
+Third extracted components:
+
+| Component | Responsibility |
+| --- | --- |
+| `PromptTemplatePanelComponent` | Renders template loading, matching template selection, apply/clear controls, selected template detail, and template messages. |
+| `PreparedPromptPreviewComponent` | Renders the prepared prompt preview fallback and generated prompt text. |
+| `HandoffPanelComponent` | Renders provider handoff guidance, copy/open controls, unsaved handoff note, and handoff messages. |
+
 `App` still owns the forms, signals, persistence calls, task workflow, and page orchestration.
 
 ---
@@ -69,7 +83,7 @@ Commands/checks:
 Frontend build output:
 
 ```text
-Initial total: 444.31 kB raw / 106.54 kB estimated transfer
+Initial total: 448.88 kB raw / 107.29 kB estimated transfer
 ```
 
 Authenticated browser smoke check confirmed the extracted New Task controls still update:
@@ -82,6 +96,8 @@ Authenticated browser smoke check confirmed the extracted New Task controls stil
 - prepared prompt preview
 - Save, Copy, and Open handoff action readiness
 
+The template/handoff split was also verified with frontend tests and production build. Browser smoke should be rerun if template application or copy/open behavior changes again.
+
 ---
 
 ## Next Split Candidates
@@ -89,9 +105,9 @@ Authenticated browser smoke check confirmed the extracted New Task controls stil
 Recommended order:
 
 1. Extract auth form.
-2. Extract template and handoff panels.
-3. Extract settings/provider preferences.
-4. Extract history list and task detail.
+2. Extract settings/provider preferences.
+3. Extract history list and task detail.
+4. Extract auth form.
 5. Decide whether routing is needed after component boundaries are clean.
 
 Keep each extraction behavior-preserving. Run build, tests, and a browser smoke test after each meaningful slice.

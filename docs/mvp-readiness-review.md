@@ -77,6 +77,7 @@ Commands run:
 | Playwright authenticated workflow at `http://localhost:4200/` | Passed after fixing task action readiness |
 | First frontend component split public shell check | Passed |
 | New Task workspace split authenticated smoke check | Passed |
+| Template and handoff split automated checks | Passed |
 
 Frontend production build:
 
@@ -108,6 +109,7 @@ Browser smoke coverage so far:
 - provider preference save changed the active recommendation, then reset/save restored default order
 - first component split kept the public auth shell and backend status panel rendering correctly
 - New Task workspace split kept task form binding, prompt character count, routing result panels, prepared prompt preview, and action readiness working correctly
+- template and handoff split kept Angular build and unit tests passing while preserving App-owned workflow actions
 
 [Back to Table of Contents](#table-of-contents)
 
@@ -139,7 +141,7 @@ These are the remaining risks before broader usage:
 
 | Blocker | Why It Matters | Recommended Action |
 | --- | --- | --- |
-| Large single Angular shell | The MVP works, but `app.ts` / `app.html` still own too much orchestration and markup. | Continue behavior-preserving component splits for templates, handoff, settings, history, and auth. |
+| Large single Angular shell | The MVP works, but `app.ts` / `app.html` still own too much orchestration and markup. | Continue behavior-preserving component splits for settings, history, and auth. |
 | Smoke-test data cleanup | The authenticated run created one task titled `Smoke test task`. | Keep it as test evidence or remove it manually later if the UI gets delete support. |
 | Backend status browser check | Public HTTP browser check passed; HTTPS remains useful if Tao runs the dev server over HTTPS. | Recheck only if switching the frontend origin to HTTPS or a different port. |
 
@@ -169,20 +171,20 @@ These should remain deferred unless a concrete need appears:
 
 # Recommended Next Slice
 
-Recommended next branch after merging the New Task workspace split:
+Recommended next branch after merging the template and handoff split:
 
 ```text
-feature/frontend-template-handoff-split
+feature/frontend-settings-preferences-split
 ```
 
 Recommended scope:
 
-1. Extract the template selector, prepared prompt preview, and handoff controls.
+1. Extract settings/default work mode and provider preference controls.
 2. Preserve the existing task workflow behavior.
 3. Keep Angular Router deferred unless real route-level navigation is chosen.
 4. Run the same build/test/browser smoke checks after the split.
 
-This is the right next step because the form/routing split is verified and the next largest inline workflow area is template and handoff handling.
+This is the right next step because settings/provider preferences are still a large inline area, but can be split without changing persistence or routing behavior.
 
 [Back to Table of Contents](#table-of-contents)
 
