@@ -13,7 +13,8 @@ The run confirms automated checks and records why the browser Supabase-backed sm
 3. [Local Config Check](#local-config-check)
 4. [Browser Smoke-Test Status](#browser-smoke-test-status)
 5. [Required Next Action](#required-next-action)
-6. [What Not To Do](#what-not-to-do)
+6. [Follow-Up Fixes](#follow-up-fixes)
+7. [What Not To Do](#what-not-to-do)
 
 ---
 
@@ -135,6 +136,27 @@ Then follow:
 
 - [MVP Smoke-Test Checklist](mvp-smoke-test-checklist.md)
 - [Backend Status Troubleshooting](backend-status-troubleshooting.md)
+
+[Back to Table of Contents](#table-of-contents)
+
+---
+
+# Follow-Up Fixes
+
+After this run record:
+
+| Item | Status |
+| --- | --- |
+| Local `frontend/public/config.js` | Created by Tao and must stay uncommitted. |
+| Supabase API URL | Corrected to use the project API URL, not the dashboard URL. |
+| HTTPS local backend status CORS | Fixed and merged to `main` in `e9ee6e5`. |
+| Login profile sync loop | Fixed and merged to `main` in `e9ee6e5`. |
+
+Next action:
+
+```text
+Continue the MVP browser smoke test against the real local Supabase-backed app.
+```
 
 [Back to Table of Contents](#table-of-contents)
 
