@@ -22,4 +22,31 @@ describe('App', () => {
     expect(compiled.querySelector('h1')?.textContent).toContain('AI work starts here.');
     expect(compiled.querySelector('button[type="submit"]')?.textContent).toContain('Sign in');
   });
+
+  it('should enable task actions when the task form becomes valid', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance as unknown as {
+      auth: { configReady: { set: (value: boolean) => void } };
+      taskForm: {
+        controls: {
+          rawPrompt: { setValue: (value: string) => void };
+        };
+      };
+      taskReadyToSave: () => boolean;
+      handoffReady: () => boolean;
+    };
+
+    fixture.detectChanges();
+
+    expect(app.taskReadyToSave()).toBe(false);
+    expect(app.handoffReady()).toBe(false);
+
+    app.auth.configReady.set(true);
+    app.taskForm.controls.rawPrompt.setValue(
+      'Fix an Angular form validation issue with the smallest safe patch.',
+    );
+
+    expect(app.taskReadyToSave()).toBe(true);
+    expect(app.handoffReady()).toBe(true);
+  });
 });

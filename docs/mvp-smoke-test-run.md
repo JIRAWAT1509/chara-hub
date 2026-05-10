@@ -2,7 +2,7 @@
 
 This document records MVP smoke-test runs after the smoke-test checklist was added.
 
-The latest run confirms automated checks, local runtime config presence, and the public browser shell/backend-status path. Authenticated workflow testing still needs Tao's real local session.
+The latest run confirms automated checks, local runtime config presence, public backend-status behavior, and the authenticated Supabase-backed MVP workflow.
 
 ---
 
@@ -29,7 +29,7 @@ Run date:
 Branch:
 
 ```text
-feature/mvp-browser-smoke-test
+feature/authenticated-smoke-test-fixes
 ```
 
 Result:
@@ -37,7 +37,7 @@ Result:
 ```text
 Automated checks passed.
 Public browser smoke test passed.
-Authenticated Supabase workflow smoke test still needs manual login/session.
+Authenticated Supabase workflow smoke test passed after one frontend readiness fix.
 ```
 
 [Back to Table of Contents](#table-of-contents)
@@ -49,13 +49,13 @@ Authenticated Supabase workflow smoke test still needs manual login/session.
 | Check | Command | Result |
 | --- | --- | --- |
 | Frontend production build | `cd frontend && npm.cmd run build` | Passed |
-| Frontend tests | `cd frontend && npm.cmd test -- --watch=false` | Passed: 1 test file, 2 tests |
+| Frontend tests | `cd frontend && npm.cmd test -- --watch=false` | Passed: 1 test file, 3 tests |
 | Backend tests | `cd backend && cmd /c mvnw.cmd test` | Passed: 4 tests |
 
 Frontend build output:
 
 ```text
-Initial total: 441.15 kB raw / 105.44 kB estimated transfer
+Initial total: 441.22 kB raw / 105.41 kB estimated transfer
 ```
 
 Backend test coverage included:
@@ -103,9 +103,7 @@ Observed public shell state:
 - backend status response included `access-control-allow-origin: http://localhost:4200`
 - browser console had no errors or warnings beyond Angular development-mode logging
 
-Authenticated checklist sections were not completed because the automated run did not use Tao's credentials or persisted Supabase session.
-
-Remaining manual checklist sections:
+Authenticated checklist sections completed after Tao signed in locally:
 
 - Auth smoke test
 - New Task smoke test against real Supabase session
@@ -114,7 +112,32 @@ Remaining manual checklist sections:
 - Handoff event persistence smoke test
 - Provider preference persistence smoke test
 
-This is no longer a missing-config blocker. The remaining risk is authenticated end-to-end behavior after Tao signs in locally.
+The smoke test created one saved task titled `Smoke test task` in Tao's local Supabase project. Provider preference order was temporarily changed to verify persistence, then reset and saved back to the default order.
+
+Bug found during smoke testing:
+
+```text
+After entering a valid task prompt, Save task and Copy prepared prompt stayed disabled.
+```
+
+Cause:
+
+```text
+The Angular computed values read taskForm.valid, but taskForm.valid is not a signal.
+The computed values did not track task form value changes.
+```
+
+Fix:
+
+```text
+taskReadyToSave and handoffReady now track taskValue() before reading taskForm.valid.
+```
+
+Console/network result:
+
+- browser console had no application errors after the fix
+- the previous Angular `NG0956` warning was removed by changing small repeated tag lists to track by index
+- Supabase task, recommendation, history, and provider preference requests returned successful `200`, `201`, or `204` responses
 
 [Back to Table of Contents](#table-of-contents)
 
@@ -122,10 +145,11 @@ This is no longer a missing-config blocker. The remaining risk is authenticated 
 
 # Required Next Action
 
-Sign in locally, then follow:
+Next product work:
 
-- [MVP Smoke-Test Checklist](mvp-smoke-test-checklist.md)
-- [Backend Status Troubleshooting](backend-status-troubleshooting.md)
+- keep this smoke-test fix branch small
+- merge it to `main`
+- start planning the frontend component split before any larger UI work
 
 Do not paste credentials into docs, commits, screenshots, or chat.
 
@@ -145,11 +169,13 @@ After this run record:
 | Login profile sync loop | Fixed and merged to `main` in `e9ee6e5`. |
 | Progress docs after CORS fix | Merged to `main` in `34935be`. |
 | Public browser shell smoke test | Passed on `feature/mvp-browser-smoke-test`. |
+| Authenticated browser smoke test | Passed on `feature/authenticated-smoke-test-fixes`. |
+| Task action readiness bug | Fixed on `feature/authenticated-smoke-test-fixes`. |
 
 Next action:
 
 ```text
-Complete the authenticated MVP browser smoke test after Tao signs in locally.
+Plan the frontend component split now that the MVP browser smoke test is stable.
 ```
 
 [Back to Table of Contents](#table-of-contents)

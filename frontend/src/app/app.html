@@ -170,7 +170,7 @@
 
             @if (classification().matchedSignals.length) {
               <div class="signal-list">
-                @for (signal of classification().matchedSignals; track signal) {
+                @for (signal of classification().matchedSignals; track $index) {
                   <span>{{ signal }}</span>
                 }
               </div>
@@ -196,7 +196,7 @@
               <div>
                 <p class="eyebrow">Why this fits</p>
                 <div class="signal-list">
-                  @for (strength of recommendation().primaryProviderStrengths; track strength) {
+                  @for (strength of recommendation().primaryProviderStrengths; track $index) {
                     <span>{{ strength }}</span>
                   }
                 </div>
