@@ -151,6 +151,10 @@ http://localhost:4200
 http://127.0.0.1:4200
 http://localhost:4201
 http://127.0.0.1:4201
+https://localhost:4200
+https://127.0.0.1:4200
+https://localhost:4201
+https://127.0.0.1:4201
 ```
 
 If the Angular dev server runs on another port, either use one of the allowed ports or add the new development origin to the backend status CORS list.

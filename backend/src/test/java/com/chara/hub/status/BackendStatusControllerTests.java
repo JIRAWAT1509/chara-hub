@@ -35,4 +35,12 @@ class BackendStatusControllerTests {
 				.andExpect(status().isOk())
 				.andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:4200"));
 	}
+
+	@Test
+	void statusAllowsHttpsLocalFrontendDevelopmentOrigin() throws Exception {
+		mockMvc.perform(get("/api/status")
+				.header("Origin", "https://localhost:4200"))
+				.andExpect(status().isOk())
+				.andExpect(header().string("Access-Control-Allow-Origin", "https://localhost:4200"));
+	}
 }

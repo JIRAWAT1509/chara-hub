@@ -448,8 +448,13 @@ export class App {
         emitEvent: false,
       });
 
-      if (!this.taskDraft().rawPrompt.trim()) {
-        this.taskForm.controls.workMode.setValue(profile.default_work_mode);
+      if (
+        !this.taskDraft().rawPrompt.trim() &&
+        this.taskForm.controls.workMode.value !== profile.default_work_mode
+      ) {
+        this.taskForm.controls.workMode.setValue(profile.default_work_mode, {
+          emitEvent: false,
+        });
       }
     });
 
