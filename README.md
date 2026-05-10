@@ -154,7 +154,7 @@ Switch between different working profiles:
 
 The first version focuses on Hub mode only.
 
-Planned MVP features:
+Current MVP features:
 
 | Feature | Status |
 | --- | --- |
@@ -333,7 +333,7 @@ Implemented so far:
 Recommended next implementation order:
 
 ```text
-1. Add frontend backend-status visibility only if it helps local development.
+1. Decide whether JWT validation is worth implementing now.
 2. Add JWT validation before any backend endpoint owns user data.
 3. Move recommendation policy server-side only when frontend rules become hard to manage.
 4. Add routed pages only after the single-shell MVP is stable.
