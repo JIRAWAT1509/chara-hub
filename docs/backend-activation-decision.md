@@ -140,9 +140,13 @@ Recommended order:
 
 1. Keep `/api/status` as the first backend contract.
 2. Keep the frontend backend-status display lightweight and optional.
-3. Decide whether JWT validation is worth implementing now.
+3. Keep JWT validation deferred until a protected backend-owned endpoint exists.
 4. Add JWT validation before any backend endpoint reads or writes user-owned data.
 5. Move recommendation policy server-side only when frontend rules become hard to manage.
 6. Add database access only when the backend owns a real workflow.
+
+See also:
+
+- [JWT Backend Decision](jwt-backend-decision.md)
 
 [Back to Table of Contents](#table-of-contents)

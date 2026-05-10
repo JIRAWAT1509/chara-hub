@@ -178,6 +178,7 @@ Current MVP features:
 | Provider preference settings | Implemented |
 | Backend status endpoint | Implemented |
 | Frontend backend status display | Implemented |
+| JWT backend decision | Implemented |
 | Backend-owned user data flow | Deferred |
 
 The most important MVP screen is the New Task workspace because it proves the core product loop.
@@ -328,15 +329,16 @@ Implemented so far:
 14. Provider preference settings.
 15. Backend status endpoint and activation decision.
 16. Frontend backend status display.
+17. JWT backend decision.
 ```
 
 Recommended next implementation order:
 
 ```text
-1. Decide whether JWT validation is worth implementing now.
+1. Keep JWT validation deferred until the backend owns a protected endpoint.
 2. Add JWT validation before any backend endpoint owns user data.
-3. Move recommendation policy server-side only when frontend rules become hard to manage.
-4. Add routed pages only after the single-shell MVP is stable.
+3. Improve local development ergonomics or polish the single-shell workflow.
+4. Move recommendation policy server-side only when frontend rules become hard to manage.
 ```
 
 The project intentionally stays small. The goal is to make the core workflow useful before adding desktop shells, local agents, or advanced automation.
