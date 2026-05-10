@@ -185,6 +185,7 @@ Current MVP features:
 | First-run checklist | Implemented |
 | Backend status troubleshooting | Implemented |
 | MVP readiness review | Implemented |
+| MVP smoke-test checklist | Implemented |
 | Backend-owned user data flow | Deferred |
 
 The most important MVP screen is the New Task workspace because it proves the core product loop.
@@ -310,6 +311,7 @@ Use the local development guide for setup, safe config files, frontend/backend c
 - [Local Development Guide](docs/local-dev-guide.md)
 - [Backend Status Troubleshooting](docs/backend-status-troubleshooting.md)
 - [MVP Readiness Review](docs/mvp-readiness-review.md)
+- [MVP Smoke-Test Checklist](docs/mvp-smoke-test-checklist.md)
 
 [Back to Table of Contents](#table-of-contents)
 
@@ -354,6 +356,7 @@ Implemented so far:
 20. First-run checklist.
 21. Backend status troubleshooting.
 22. MVP readiness review.
+23. MVP smoke-test checklist.
 ```
 
 Recommended next implementation order:
@@ -361,8 +364,9 @@ Recommended next implementation order:
 ```text
 1. Keep JWT validation deferred until the backend owns a protected endpoint.
 2. Add JWT validation before any backend endpoint owns user data.
-3. Run an MVP smoke-test checklist against the real local Supabase-backed app.
-4. Move recommendation policy server-side only when frontend rules become hard to manage.
+3. Run the MVP smoke-test checklist against the real local Supabase-backed app.
+4. Fix only bugs found during smoke testing.
+5. Move recommendation policy server-side only when frontend rules become hard to manage.
 ```
 
 The project intentionally stays small. The goal is to make the core workflow useful before adding desktop shells, local agents, or advanced automation.

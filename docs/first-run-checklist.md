@@ -6,6 +6,8 @@ For detailed explanations, use the full [Local Development Guide](local-dev-guid
 
 For readiness status, see the [MVP Readiness Review](mvp-readiness-review.md).
 
+For end-to-end manual validation, use the [MVP Smoke-Test Checklist](mvp-smoke-test-checklist.md).
+
 ---
 
 ## Table of Contents

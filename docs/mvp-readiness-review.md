@@ -56,6 +56,8 @@ Sign in
 
 The main remaining work is not a new backend architecture. The main remaining work is a focused manual smoke test and small bug-fix pass against the real local Supabase project.
 
+Use the [MVP Smoke-Test Checklist](mvp-smoke-test-checklist.md) for that manual validation pass.
+
 [Back to Table of Contents](#table-of-contents)
 
 ---
@@ -146,15 +148,14 @@ These should remain deferred unless a concrete need appears:
 Recommended next branch:
 
 ```text
-feature/mvp-smoke-test-checklist
+feature/mvp-smoke-test-run
 ```
 
 Recommended scope:
 
-1. Add a manual smoke-test checklist for the current MVP.
-2. Cover auth, New Task, templates, save/history/reuse, handoff events, provider preferences, and backend status.
-3. Keep it as a verification checklist unless a real bug is found.
-4. Fix only bugs found during the smoke test.
+1. Run the manual smoke-test checklist against Tao's real local Supabase-backed app.
+2. Record pass/fail notes.
+3. Fix only bugs found during the smoke test.
 
 This is the right next step because the code already builds and tests pass. The remaining risk is whether the real local flow works cleanly end to end.
 

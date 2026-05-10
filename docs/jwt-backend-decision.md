@@ -128,7 +128,7 @@ Keep JWT deferred, then improve onboarding and local troubleshooting around the 
 
 Good candidates:
 
-- MVP smoke-test checklist
+- MVP smoke-test run
 - first-run setup checklist
 - lightweight docs or UI polish only where it reduces setup friction
 

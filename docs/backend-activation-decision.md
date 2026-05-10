@@ -151,5 +151,6 @@ See also:
 - [Local Development Guide](local-dev-guide.md)
 - [Backend Status Troubleshooting](backend-status-troubleshooting.md)
 - [MVP Readiness Review](mvp-readiness-review.md)
+- [MVP Smoke-Test Checklist](mvp-smoke-test-checklist.md)
 
 [Back to Table of Contents](#table-of-contents)
