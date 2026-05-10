@@ -174,7 +174,10 @@ Planned MVP features:
 | Built-in template application | Implemented |
 | Basic settings for default work mode | Implemented |
 | Bundle budget cleanup | Implemented |
-| Provider preference settings | Planned |
+| Lightweight dashboard summary | Implemented |
+| Provider preference settings | Implemented |
+| Backend status endpoint | Implemented |
+| Backend-owned user data flow | Deferred |
 
 The most important MVP screen is the New Task workspace because it proves the core product loop.
 
@@ -238,9 +241,17 @@ High-level architecture:
 ```text
 User
 -> Angular Frontend
--> Spring Boot API
--> Supabase
+-> Supabase Auth
+-> Supabase Postgres
 ```
+
+Current Spring Boot mode:
+
+```text
+passive
+```
+
+Spring Boot currently exposes backend status/capability information. It does not own user data flow yet.
 
 Later phase:
 
@@ -294,7 +305,7 @@ Core MVP workflow implementation
 Current focus:
 
 ```text
-Keep the single-shell Hub workflow stable, then decide whether dashboard summary or backend activation is the next useful step.
+Keep the single-shell Hub workflow stable, then activate Spring Boot only for concrete server-side responsibilities.
 ```
 
 Implemented so far:
@@ -312,14 +323,17 @@ Implemented so far:
 10. Built-in prompt template selection and application.
 11. Basic settings for default work mode.
 12. Bundle cleanup by removing unused router runtime.
+13. Lightweight dashboard summary.
+14. Provider preference settings.
+15. Backend status endpoint and activation decision.
 ```
 
 Recommended next implementation order:
 
 ```text
-1. Add a lightweight dashboard/home summary inside the current shell.
-2. Decide when Spring Boot should become active in the workflow.
-3. Add provider preference settings.
+1. Add frontend backend-status visibility only if it helps local development.
+2. Add JWT validation before any backend endpoint owns user data.
+3. Move recommendation policy server-side only when frontend rules become hard to manage.
 4. Add routed pages only after the single-shell MVP is stable.
 ```
 
