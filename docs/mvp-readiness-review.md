@@ -150,14 +150,15 @@ These should remain deferred unless a concrete need appears:
 Recommended next branch:
 
 ```text
-feature/mvp-smoke-test-run
+feature/mvp-browser-smoke-test
 ```
 
 Recommended scope:
 
-1. Run the manual smoke-test checklist against Tao's real local Supabase-backed app.
+1. Continue the manual smoke-test checklist against Tao's real local Supabase-backed app.
 2. Record pass/fail notes.
 3. Fix only bugs found during the smoke test.
+4. Plan frontend component/route splitting only after the browser smoke test is stable.
 
 This is the right next step because the code already builds and tests pass. The remaining risk is whether the real local flow works cleanly end to end.
 

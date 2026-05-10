@@ -187,6 +187,8 @@ Current MVP features:
 | MVP readiness review | Implemented |
 | MVP smoke-test checklist | Implemented |
 | MVP smoke-test run record | Blocked by missing local config |
+| HTTPS local backend status CORS | Implemented |
+| Login profile sync loop fix | Implemented |
 | Backend-owned user data flow | Deferred |
 
 The most important MVP screen is the New Task workspace because it proves the core product loop.
@@ -360,6 +362,8 @@ Implemented so far:
 22. MVP readiness review.
 23. MVP smoke-test checklist.
 24. MVP smoke-test run record: automated checks passed, browser smoke test blocked by missing local `frontend/public/config.js`.
+25. HTTPS local backend status CORS.
+26. Login profile sync loop fix after local browser smoke testing.
 ```
 
 Recommended next implementation order:
@@ -367,10 +371,11 @@ Recommended next implementation order:
 ```text
 1. Keep JWT validation deferred until the backend owns a protected endpoint.
 2. Add JWT validation before any backend endpoint owns user data.
-3. Create local `frontend/public/config.js` from the example file.
-4. Run the MVP smoke-test checklist against the real local Supabase-backed app.
+3. Continue the MVP browser smoke test with Tao's ignored local config files.
+4. Record pass/fail notes for auth, New Task, save/history/reuse, provider preferences, and backend status.
 5. Fix only bugs found during smoke testing.
-6. Move recommendation policy server-side only when frontend rules become hard to manage.
+6. Plan frontend component/route split after the MVP smoke test is stable.
+7. Move recommendation policy server-side only when frontend rules become hard to manage.
 ```
 
 The project intentionally stays small. The goal is to make the core workflow useful before adding desktop shells, local agents, or advanced automation.
