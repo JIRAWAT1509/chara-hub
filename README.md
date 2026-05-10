@@ -17,7 +17,8 @@ Chara Hub is not a new LLM. It is not a backend automation layer for consumer we
 7. [Target AI Destinations](#target-ai-destinations)
 8. [Tech Direction](#tech-direction)
 9. [Project Boundaries](#project-boundaries)
-10. [Current Status](#current-status)
+10. [Local Development](#local-development)
+11. [Current Status](#current-status)
 
 ---
 
@@ -296,6 +297,16 @@ This boundary matters because the first version should solve a real workflow pro
 
 ---
 
+# Local Development
+
+Use the local development guide for setup, safe config files, frontend/backend commands, verification, and Git safety:
+
+- [Local Development Guide](docs/local-dev-guide.md)
+
+[Back to Table of Contents](#table-of-contents)
+
+---
+
 # Current Status
 
 Current phase:
@@ -330,6 +341,7 @@ Implemented so far:
 15. Backend status endpoint and activation decision.
 16. Frontend backend status display.
 17. JWT backend decision.
+18. Local development guide.
 ```
 
 Recommended next implementation order:
