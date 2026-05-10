@@ -189,6 +189,8 @@ Current MVP features:
 | MVP smoke-test run record | Authenticated MVP workflow passed with one frontend fix |
 | HTTPS local backend status CORS | Implemented |
 | Login profile sync loop fix | Implemented |
+| Initial frontend component split | Implemented |
+| New Task workspace component split | Implemented |
 | Backend-owned user data flow | Deferred |
 
 The most important MVP screen is the New Task workspace because it proves the core product loop.
@@ -366,6 +368,7 @@ Implemented so far:
 25. HTTPS local backend status CORS.
 26. Login profile sync loop fix after local browser smoke testing.
 27. First frontend component split for brand header, dashboard summary, and build context panel.
+28. New Task workspace split for task form and routing result panels.
 ```
 
 Recommended next implementation order:
@@ -373,7 +376,7 @@ Recommended next implementation order:
 ```text
 1. Keep JWT validation deferred until the backend owns a protected endpoint.
 2. Add JWT validation before any backend endpoint owns user data.
-3. Continue behavior-preserving frontend component splits.
+3. Continue behavior-preserving frontend component splits for templates, handoff, settings, and history.
 4. Keep routing optional until the component boundaries are clean.
 5. Move recommendation policy server-side only when frontend rules become hard to manage.
 ```
