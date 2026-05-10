@@ -159,6 +159,8 @@ window.CHARA_HUB_CONFIG = {
 
 If `backendApiUrl` is missing, the frontend remains usable and reports that backend status is not configured.
 
+If the status check fails, use [Backend Status Troubleshooting](backend-status-troubleshooting.md).
+
 [Back to Table of Contents](#table-of-contents)
 
 ---

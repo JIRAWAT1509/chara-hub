@@ -2,12 +2,19 @@ package com.chara.hub.status;
 
 import java.util.List;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/status")
+@CrossOrigin(origins = {
+		"http://localhost:4200",
+		"http://127.0.0.1:4200",
+		"http://localhost:4201",
+		"http://127.0.0.1:4201"
+})
 class BackendStatusController {
 
 	@GetMapping

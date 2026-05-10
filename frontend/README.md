@@ -122,6 +122,7 @@ For full local setup, backend status wiring, verification commands, and Git safe
 
 - [First-Run Checklist](../docs/first-run-checklist.md)
 - [Local Development Guide](../docs/local-dev-guide.md)
+- [Backend Status Troubleshooting](../docs/backend-status-troubleshooting.md)
 
 [Back to Table of Contents](#table-of-contents)
 
