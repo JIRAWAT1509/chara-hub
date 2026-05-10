@@ -1,0 +1,44 @@
+<form class="task-form" [formGroup]="taskForm()">
+  <label>
+    Task title
+    <input type="text" formControlName="title" placeholder="Optional short label" />
+  </label>
+
+  <label>
+    <span class="label-row">
+      Prompt
+      <small>{{ promptCharacterCount() }} chars</small>
+    </span>
+    <textarea
+      formControlName="rawPrompt"
+      rows="8"
+      placeholder="Paste the task you want to hand off to the right AI tool"
+    ></textarea>
+    @if (
+      taskForm().controls['rawPrompt'].touched &&
+      taskForm().controls['rawPrompt'].invalid
+    ) {
+      <small class="field-hint">Write at least 6 characters before saving or handing off.</small>
+    }
+  </label>
+
+  <div class="control-grid">
+    <label>
+      Work mode
+      <select formControlName="workMode">
+        @for (workMode of workModes(); track workMode) {
+          <option [value]="workMode">{{ workModeLabels()[workMode] }}</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      Selected category
+      <select formControlName="category">
+        @for (category of taskCategories(); track category) {
+          <option [value]="category">{{ taskCategoryLabels()[category] }}</option>
+        }
+      </select>
+    </label>
+  </div>
+</form>

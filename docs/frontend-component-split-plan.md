@@ -1,14 +1,14 @@
 # Frontend Component Split Plan
 
-This document records the first frontend component split after the authenticated MVP smoke test passed.
+This document records the frontend component splits after the authenticated MVP smoke test passed.
 
 The goal is to reduce risk in `app.ts` and `app.html` without changing product behavior, adding routes, or starting a design-system migration.
 
 ---
 
-## Current Slice
+## Completed Slices
 
-Branch:
+First branch:
 
 ```text
 feature/frontend-component-split-plan
@@ -21,6 +21,19 @@ First extracted components:
 | `BrandHeaderComponent` | Renders the Chara Hub title and runtime config status. |
 | `DashboardSummaryComponent` | Renders signed-in dashboard counts, latest task, and workspace shortcuts. |
 | `BuildContextPanelComponent` | Renders build/backend status and owns passive backend status refresh. |
+
+Second branch:
+
+```text
+feature/frontend-task-workspace-split
+```
+
+Second extracted components:
+
+| Component | Responsibility |
+| --- | --- |
+| `NewTaskFormComponent` | Renders task title, prompt, work mode, category controls, and prompt character count. |
+| `TaskRoutingResultsComponent` | Renders detected category and provider recommendation result panels, including preference notes and alternatives. |
 
 `App` still owns the forms, signals, persistence calls, task workflow, and page orchestration.
 
@@ -49,14 +62,25 @@ Commands/checks:
 | `cd frontend && npm.cmd test -- --watch=false` | Passed: 1 test file, 3 tests |
 | `cd frontend && npm.cmd run build` | Passed |
 | Playwright public shell at `http://localhost:4200/` | Passed |
+| Playwright authenticated New Task form smoke check | Passed |
 | Browser console | No application errors or warnings |
 | Backend status request | `GET http://localhost:8080/api/status` returned `200` |
 
 Frontend build output:
 
 ```text
-Initial total: 442.09 kB raw / 106.43 kB estimated transfer
+Initial total: 444.31 kB raw / 106.54 kB estimated transfer
 ```
+
+Authenticated browser smoke check confirmed the extracted New Task controls still update:
+
+- task title input
+- prompt textarea
+- prompt character count
+- detected category panel
+- provider recommendation panel
+- prepared prompt preview
+- Save, Copy, and Open handoff action readiness
 
 ---
 
@@ -65,10 +89,10 @@ Initial total: 442.09 kB raw / 106.43 kB estimated transfer
 Recommended order:
 
 1. Extract auth form.
-2. Extract new task form and result panels.
-3. Extract template and handoff panels.
-4. Extract settings/provider preferences.
-5. Extract history list and task detail.
+2. Extract template and handoff panels.
+3. Extract settings/provider preferences.
+4. Extract history list and task detail.
+5. Decide whether routing is needed after component boundaries are clean.
 
 Keep each extraction behavior-preserving. Run build, tests, and a browser smoke test after each meaningful slice.
 

@@ -25,6 +25,8 @@ import {
   TaskStatus,
   WorkMode,
 } from './core/models';
+import { NewTaskFormComponent } from './features/task-workspace/new-task-form/new-task-form.component';
+import { TaskRoutingResultsComponent } from './features/task-workspace/task-routing-results/task-routing-results.component';
 import { BrandHeaderComponent } from './shared/brand-header/brand-header.component';
 import { BuildContextPanelComponent } from './shared/build-context-panel/build-context-panel.component';
 import { DashboardSummaryComponent } from './shared/dashboard-summary/dashboard-summary.component';
@@ -104,6 +106,8 @@ const TASK_HISTORY_EVENT_LABELS: Record<string, string> = {
     BrandHeaderComponent,
     BuildContextPanelComponent,
     DashboardSummaryComponent,
+    NewTaskFormComponent,
+    TaskRoutingResultsComponent,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',

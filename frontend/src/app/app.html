@@ -40,137 +40,23 @@
           </div>
         </section>
 
-        <form class="task-form" [formGroup]="taskForm">
-          <label>
-            Task title
-            <input type="text" formControlName="title" placeholder="Optional short label" />
-          </label>
+        <app-new-task-form
+          [taskForm]="taskForm"
+          [promptCharacterCount]="promptCharacterCount()"
+          [workModes]="workModes"
+          [workModeLabels]="workModeLabels"
+          [taskCategories]="taskCategories"
+          [taskCategoryLabels]="taskCategoryLabels"
+        />
 
-          <label>
-            <span class="label-row">
-              Prompt
-              <small>{{ promptCharacterCount() }} chars</small>
-            </span>
-            <textarea
-              formControlName="rawPrompt"
-              rows="8"
-              placeholder="Paste the task you want to hand off to the right AI tool"
-            ></textarea>
-            @if (taskForm.controls.rawPrompt.touched && taskForm.controls.rawPrompt.invalid) {
-              <small class="field-hint"
-                >Write at least 6 characters before saving or handing off.</small
-              >
-            }
-          </label>
-
-          <div class="control-grid">
-            <label>
-              Work mode
-              <select formControlName="workMode">
-                @for (workMode of workModes; track workMode) {
-                  <option [value]="workMode">{{ workModeLabels[workMode] }}</option>
-                }
-              </select>
-            </label>
-
-            <label>
-              Selected category
-              <select formControlName="category">
-                @for (category of taskCategories; track category) {
-                  <option [value]="category">{{ taskCategoryLabels[category] }}</option>
-                }
-              </select>
-            </label>
-          </div>
-        </form>
-
-        <div class="result-grid">
-          <section class="result-panel">
-            <div class="result-heading">
-              <div>
-                <p class="eyebrow">Detected category</p>
-                <h3>{{ taskCategoryLabels[classification().category] }}</h3>
-              </div>
-              <span>{{ (classification().confidence * 100).toFixed(0) }}%</span>
-            </div>
-
-            <p>{{ classification().reason }}</p>
-
-            @if (classification().matchedSignals.length) {
-              <div class="signal-list">
-                @for (signal of classification().matchedSignals; track $index) {
-                  <span>{{ signal }}</span>
-                }
-              </div>
-            }
-
-            <button class="secondary-button" type="button" (click)="useDetectedCategory()">
-              Use detected category
-            </button>
-          </section>
-
-          <section class="result-panel">
-            <div class="result-heading">
-              <div>
-                <p class="eyebrow">Recommended provider</p>
-                <h3>{{ recommendation().primaryProviderName }}</h3>
-              </div>
-              <span>{{ recommendation().confidenceLabel }}</span>
-            </div>
-
-            <p>{{ recommendation().reason }}</p>
-
-            <div class="recommendation-detail">
-              <div>
-                <p class="eyebrow">Why this fits</p>
-                <div class="signal-list">
-                  @for (strength of recommendation().primaryProviderStrengths; track $index) {
-                    <span>{{ strength }}</span>
-                  }
-                </div>
-              </div>
-
-              <div class="recommendation-note">
-                <strong>{{ (recommendation().confidence * 100).toFixed(0) }}% confidence</strong>
-                <span>{{
-                  recommendation().handoffKind === 'URL' ? 'Browser handoff' : 'Manual tool handoff'
-                }}</span>
-              </div>
-
-              @if (activeRecommendationPreference(); as preference) {
-                <div class="recommendation-note">
-                  <strong>Preference applied</strong>
-                  <span>
-                    {{ taskCategoryLabels[preference.category] }} /
-                    {{ preference.work_mode ? workModeLabels[preference.work_mode] : 'Any mode' }}
-                  </span>
-                </div>
-              }
-
-              <div class="recommendation-note">
-                <strong>Watch out</strong>
-                <span>{{ recommendation().primaryProviderWeakFit }}</span>
-              </div>
-
-              @if (recommendation().alternativeSummaries.length) {
-                <div>
-                  <p class="eyebrow">Alternatives</p>
-                  <div class="alternative-list">
-                    @for (
-                      alternative of recommendation().alternativeSummaries;
-                      track alternative.providerId
-                    ) {
-                      <div>
-                        <strong>{{ alternative.providerName }}</strong>
-                        <span>{{ alternative.summary }}</span>
-                      </div>
-                    }
-                  </div>
-                </div>
-              }
-            </div>
-          </section>
-        </div>
+        <app-task-routing-results
+          [classification]="classification()"
+          [recommendation]="recommendation()"
+          [activeRecommendationPreference]="activeRecommendationPreference()"
+          [taskCategoryLabels]="taskCategoryLabels"
+          [workModeLabels]="workModeLabels"
+          (detectedCategorySelected)="useDetectedCategory()"
+        />
 
         <section id="templates" class="template-panel">
           <div class="workspace-header">
