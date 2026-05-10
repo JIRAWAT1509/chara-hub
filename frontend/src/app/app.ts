@@ -25,7 +25,10 @@ import {
   TaskStatus,
   WorkMode,
 } from './core/models';
+import { HandoffPanelComponent } from './features/task-workspace/handoff-panel/handoff-panel.component';
 import { NewTaskFormComponent } from './features/task-workspace/new-task-form/new-task-form.component';
+import { PreparedPromptPreviewComponent } from './features/task-workspace/prepared-prompt-preview/prepared-prompt-preview.component';
+import { PromptTemplatePanelComponent } from './features/task-workspace/prompt-template-panel/prompt-template-panel.component';
 import { TaskRoutingResultsComponent } from './features/task-workspace/task-routing-results/task-routing-results.component';
 import { BrandHeaderComponent } from './shared/brand-header/brand-header.component';
 import { BuildContextPanelComponent } from './shared/build-context-panel/build-context-panel.component';
@@ -106,7 +109,10 @@ const TASK_HISTORY_EVENT_LABELS: Record<string, string> = {
     BrandHeaderComponent,
     BuildContextPanelComponent,
     DashboardSummaryComponent,
+    HandoffPanelComponent,
     NewTaskFormComponent,
+    PreparedPromptPreviewComponent,
+    PromptTemplatePanelComponent,
     TaskRoutingResultsComponent,
   ],
   templateUrl: './app.html',
