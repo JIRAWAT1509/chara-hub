@@ -309,6 +309,33 @@ export class App {
     );
   });
 
+  protected readonly providerPreferenceFallbackWorkMode = computed<WorkMode>(() => {
+    const value = this.providerPreferenceValue();
+    const workModeScope = value.workModeScope ?? 'CHARA_WORK';
+
+    return workModeScope === 'ANY'
+      ? this.settingsForm.getRawValue().defaultWorkMode
+      : workModeScope;
+  });
+
+  protected readonly providerPreferenceBaselineOrder = computed(() => {
+    const value = this.providerPreferenceValue();
+    const category = value.category ?? 'CODING_LOGICAL';
+
+    return (
+      this.selectedProviderPreference()?.provider_order ??
+      this.preferenceDefaultProviderOrder(category, this.providerPreferenceFallbackWorkMode())
+    );
+  });
+
+  protected readonly providerPreferenceHasChanges = computed(
+    () =>
+      !this.sameProviderOrder(
+        this.providerPreferenceOrder(),
+        this.providerPreferenceBaselineOrder(),
+      ),
+  );
+
   protected readonly activeRecommendationPreference = computed(() => {
     const task = this.taskDraft();
 
@@ -389,6 +416,11 @@ export class App {
       this.handoffIsError.set(false);
     });
 
+    this.providerPreferenceForm.valueChanges.subscribe(() => {
+      this.providerPreferenceMessage.set('');
+      this.providerPreferenceMessageIsError.set(false);
+    });
+
     effect(() => {
       if (this.auth.signedIn()) {
         void this.loadRecentTasks();
@@ -422,18 +454,7 @@ export class App {
     });
 
     effect(() => {
-      const value = this.providerPreferenceValue();
-      const preference = this.selectedProviderPreference();
-      const category = value.category ?? 'CODING_LOGICAL';
-      const workModeScope = value.workModeScope ?? 'CHARA_WORK';
-      const fallbackWorkMode: WorkMode =
-        workModeScope === 'ANY' ? this.settingsForm.getRawValue().defaultWorkMode : workModeScope;
-
-      this.providerPreferenceOrder.set(
-        preference?.provider_order ?? this.preferenceDefaultProviderOrder(category, fallbackWorkMode),
-      );
-      this.providerPreferenceMessage.set('');
-      this.providerPreferenceMessageIsError.set(false);
+      this.providerPreferenceOrder.set(this.providerPreferenceBaselineOrder());
     });
   }
 
@@ -918,6 +939,10 @@ export class App {
     );
 
     return [...recommendedOrder, ...remainingProviders];
+  }
+
+  private sameProviderOrder(first: ProviderId[], second: ProviderId[]): boolean {
+    return first.length === second.length && first.every((providerId, index) => providerId === second[index]);
   }
 
   private renderTemplate(templateBody: string, task: TaskDraftValue): string {

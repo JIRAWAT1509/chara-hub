@@ -424,9 +424,20 @@
           }
 
           <section class="detail-block">
-            <div>
-              <p class="eyebrow">Provider preferences</p>
-              <h3>Routing order</h3>
+            <div class="workspace-header">
+              <div>
+                <p class="eyebrow">Provider preferences</p>
+                <h3>Routing order</h3>
+              </div>
+
+              <button
+                class="secondary-button"
+                type="button"
+                (click)="loadProviderPreferences()"
+                [disabled]="providerPreferencesLoading() || providerPreferenceSaving()"
+              >
+                {{ providerPreferencesLoading() ? 'Loading...' : 'Refresh preferences' }}
+              </button>
             </div>
 
             <form class="history-filter-form" [formGroup]="providerPreferenceForm">
@@ -496,7 +507,11 @@
                   class="primary-button"
                   type="button"
                   (click)="saveProviderPreference()"
-                  [disabled]="providerPreferenceSaving() || providerPreferencesLoading()"
+                  [disabled]="
+                    providerPreferenceSaving() ||
+                    providerPreferencesLoading() ||
+                    !providerPreferenceHasChanges()
+                  "
                 >
                   {{ providerPreferenceSaving() ? 'Saving...' : 'Save provider order' }}
                 </button>
@@ -512,6 +527,14 @@
             } @else {
               <p class="subtle-note">No saved preference for this scope yet.</p>
             }
+
+            <p class="subtle-note">
+              {{
+                providerPreferenceHasChanges()
+                  ? 'Unsaved provider order changes.'
+                  : 'Provider order matches the saved or default order.'
+              }}
+            </p>
 
             @if (providerPreferenceMessage()) {
               <p class="form-message" [class.error]="providerPreferenceMessageIsError()">
