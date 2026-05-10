@@ -74,8 +74,12 @@ export class ProviderRecommendationService {
     },
   };
 
-  recommend(category: TaskCategory, workMode: WorkMode): ProviderRecommendationPreview {
-    const providerIds = this.providerOrder(category, workMode);
+  recommend(
+    category: TaskCategory,
+    workMode: WorkMode,
+    preferredProviderOrder: ProviderId[] | null = null,
+  ): ProviderRecommendationPreview {
+    const providerIds = this.providerOrder(category, workMode, preferredProviderOrder);
     const [primaryProviderId, ...alternativeProviderIds] = providerIds;
     const primary = this.providers[primaryProviderId];
     const confidence = this.confidence(category, workMode);
@@ -103,7 +107,7 @@ export class ProviderRecommendationService {
     };
   }
 
-  private providerOrder(category: TaskCategory, workMode: WorkMode): ProviderId[] {
+  defaultProviderOrder(category: TaskCategory, workMode: WorkMode): ProviderId[] {
     if (category === 'CODING_LOGICAL') {
       return workMode === 'CHARA'
         ? ['chatgpt', 'codex', 'claude_code']
@@ -123,6 +127,23 @@ export class ProviderRecommendationService {
     }
 
     return ['chatgpt', 'claude'];
+  }
+
+  private providerOrder(
+    category: TaskCategory,
+    workMode: WorkMode,
+    preferredProviderOrder: ProviderId[] | null,
+  ): ProviderId[] {
+    const defaultOrder = this.defaultProviderOrder(category, workMode);
+
+    if (!preferredProviderOrder?.length) {
+      return defaultOrder;
+    }
+
+    const knownPreferredProviders = preferredProviderOrder.filter((id) => Boolean(this.providers[id]));
+    const remainingDefaultProviders = defaultOrder.filter((id) => !knownPreferredProviders.includes(id));
+
+    return [...knownPreferredProviders, ...remainingDefaultProviders];
   }
 
   private confidence(category: TaskCategory, workMode: WorkMode): number {

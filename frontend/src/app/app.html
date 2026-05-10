@@ -209,6 +209,16 @@
                 }}</span>
               </div>
 
+              @if (activeRecommendationPreference(); as preference) {
+                <div class="recommendation-note">
+                  <strong>Preference applied</strong>
+                  <span>
+                    {{ taskCategoryLabels[preference.category] }} /
+                    {{ preference.work_mode ? workModeLabels[preference.work_mode] : 'Any mode' }}
+                  </span>
+                </div>
+              }
+
               <div class="recommendation-note">
                 <strong>Watch out</strong>
                 <span>{{ recommendation().primaryProviderWeakFit }}</span>
@@ -412,6 +422,103 @@
               {{ settingsMessage() }}
             </p>
           }
+
+          <section class="detail-block">
+            <div>
+              <p class="eyebrow">Provider preferences</p>
+              <h3>Routing order</h3>
+            </div>
+
+            <form class="history-filter-form" [formGroup]="providerPreferenceForm">
+              <div class="history-filter-grid">
+                <label>
+                  Category
+                  <select formControlName="category">
+                    @for (category of taskCategories; track category) {
+                      <option [value]="category">{{ taskCategoryLabels[category] }}</option>
+                    }
+                  </select>
+                </label>
+
+                <label>
+                  Work mode scope
+                  <select formControlName="workModeScope">
+                    @for (workModeScope of workModeScopes; track workModeScope) {
+                      <option [value]="workModeScope">{{ workModeScopeLabel(workModeScope) }}</option>
+                    }
+                  </select>
+                </label>
+              </div>
+            </form>
+
+            @if (providerPreferencesLoading()) {
+              <p class="empty-state">Loading provider preferences...</p>
+            } @else {
+              <ol class="timeline-list">
+                @for (providerId of providerPreferenceOrder(); track providerId; let index = $index) {
+                  <li>
+                    <div>
+                      <strong>{{ index + 1 }}. {{ providerName(providerId) }}</strong>
+                    </div>
+
+                    <div class="handoff-actions">
+                      <button
+                        class="text-button"
+                        type="button"
+                        (click)="moveProviderPreference(providerId, -1)"
+                        [disabled]="index === 0"
+                      >
+                        Up
+                      </button>
+                      <button
+                        class="text-button"
+                        type="button"
+                        (click)="moveProviderPreference(providerId, 1)"
+                        [disabled]="index === providerPreferenceOrder().length - 1"
+                      >
+                        Down
+                      </button>
+                    </div>
+                  </li>
+                }
+              </ol>
+
+              <div class="handoff-actions">
+                <button
+                  class="secondary-button"
+                  type="button"
+                  (click)="resetProviderPreferenceOrder()"
+                >
+                  Reset order
+                </button>
+
+                <button
+                  class="primary-button"
+                  type="button"
+                  (click)="saveProviderPreference()"
+                  [disabled]="providerPreferenceSaving() || providerPreferencesLoading()"
+                >
+                  {{ providerPreferenceSaving() ? 'Saving...' : 'Save provider order' }}
+                </button>
+              </div>
+            }
+
+            @if (selectedProviderPreference(); as preference) {
+              <p class="subtle-note">
+                Saved preference active for
+                {{ taskCategoryLabels[preference.category] }} /
+                {{ preference.work_mode ? workModeLabels[preference.work_mode] : 'Any mode' }}.
+              </p>
+            } @else {
+              <p class="subtle-note">No saved preference for this scope yet.</p>
+            }
+
+            @if (providerPreferenceMessage()) {
+              <p class="form-message" [class.error]="providerPreferenceMessageIsError()">
+                {{ providerPreferenceMessage() }}
+              </p>
+            }
+          </section>
         </section>
 
         <section id="history" class="recent-tasks">
