@@ -149,5 +149,6 @@ See also:
 
 - [JWT Backend Decision](jwt-backend-decision.md)
 - [Local Development Guide](local-dev-guide.md)
+- [Backend Status Troubleshooting](backend-status-troubleshooting.md)
 
 [Back to Table of Contents](#table-of-contents)

@@ -4,6 +4,8 @@ This guide explains how to run Chara Hub locally without committing secrets or a
 
 For a shorter setup path, use the [First-Run Checklist](first-run-checklist.md).
 
+For backend status problems, use [Backend Status Troubleshooting](backend-status-troubleshooting.md).
+
 ---
 
 ## Table of Contents
@@ -135,6 +137,8 @@ window.CHARA_HUB_CONFIG = {
 If `backendApiUrl` is missing, the app stays usable and shows that backend status is not configured.
 
 This does not move auth or data flow to Spring Boot. Supabase still owns Auth and RLS-backed MVP data access.
+
+For local status check issues, see [Backend Status Troubleshooting](backend-status-troubleshooting.md).
 
 [Back to Table of Contents](#table-of-contents)
 
