@@ -1,0 +1,79 @@
+<section class="task-detail-panel">
+  <div class="workspace-header">
+    <div>
+      <p class="eyebrow">Task detail</p>
+      <h2>Saved prompt and timeline</h2>
+    </div>
+
+    @if (selectedTaskDetail()) {
+      <button class="secondary-button" type="button" (click)="taskDetailClosed.emit()">
+        Close
+      </button>
+    }
+  </div>
+
+  @if (taskDetailLoading()) {
+    <p class="empty-state">Loading task detail...</p>
+  } @else if (taskDetailMessage()) {
+    <p class="form-message error">{{ taskDetailMessage() }}</p>
+  } @else if (selectedTaskDetail(); as detail) {
+    <div class="task-detail-grid">
+      <section class="detail-block">
+        <p class="eyebrow">Task</p>
+        <h3>{{ detail.task.title || 'Untitled task' }}</h3>
+        <div class="detail-meta">
+          <span>{{ taskStatusLabels()[detail.task.status] }}</span>
+          <span>{{ taskCategoryLabels()[detail.task.category] }}</span>
+          <span>{{ workModeLabels()[detail.task.work_mode] }}</span>
+        </div>
+        <p>{{ detail.task.raw_prompt }}</p>
+      </section>
+
+      <section class="detail-block">
+        <p class="eyebrow">Recommendation</p>
+
+        @if (detail.recommendation) {
+          <h3>{{ providerName(detail.recommendation.primary_provider_id) }}</h3>
+          <div class="detail-meta">
+            <span>{{ (detail.recommendation.confidence * 100).toFixed(0) }}%</span>
+            @for (providerId of detail.recommendation.alternative_provider_ids; track providerId) {
+              <span>{{ providerName(providerId) }}</span>
+            }
+          </div>
+          <p>{{ detail.recommendation.reason }}</p>
+        } @else {
+          <p>No provider recommendation saved for this task.</p>
+        }
+      </section>
+    </div>
+
+    <section class="detail-block">
+      <p class="eyebrow">Prepared prompt</p>
+      <pre>{{ detail.task.prepared_prompt || 'No prepared prompt saved.' }}</pre>
+    </section>
+
+    <section class="detail-block">
+      <p class="eyebrow">Timeline</p>
+
+      @if (detail.history.length) {
+        <ol class="timeline-list">
+          @for (event of detail.history; track event.id) {
+            <li>
+              <div>
+                <strong>{{ historyEventLabel(event.event_type) }}</strong>
+                @if (event.provider_id) {
+                  <span>{{ providerName(event.provider_id) }}</span>
+                }
+              </div>
+              <time>{{ formatDateTime(event.created_at) }}</time>
+            </li>
+          }
+        </ol>
+      } @else {
+        <p class="empty-state">No history events recorded yet.</p>
+      }
+    </section>
+  } @else {
+    <p class="empty-state">Select a recent task to inspect its saved prompt and events.</p>
+  }
+</section>
