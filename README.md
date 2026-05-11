@@ -192,6 +192,7 @@ Current MVP features:
 | Initial frontend component split | Implemented |
 | New Task workspace component split | Implemented |
 | Template and handoff component split | Implemented |
+| Settings and provider preferences component split | Implemented |
 | Backend-owned user data flow | Deferred |
 
 The most important MVP screen is the New Task workspace because it proves the core product loop.
@@ -371,6 +372,7 @@ Implemented so far:
 27. First frontend component split for brand header, dashboard summary, and build context panel.
 28. New Task workspace split for task form and routing result panels.
 29. Template and handoff split for prompt templates, prepared prompt preview, and handoff controls.
+30. Settings and provider preferences split for workflow defaults and routing order controls.
 ```
 
 Recommended next implementation order:
@@ -378,7 +380,7 @@ Recommended next implementation order:
 ```text
 1. Keep JWT validation deferred until the backend owns a protected endpoint.
 2. Add JWT validation before any backend endpoint owns user data.
-3. Continue behavior-preserving frontend component splits for settings, history, and auth.
+3. Continue behavior-preserving frontend component splits for history/detail and auth.
 4. Keep routing optional until the component boundaries are clean.
 5. Move recommendation policy server-side only when frontend rules become hard to manage.
 ```

@@ -49,6 +49,18 @@ Third extracted components:
 | `PreparedPromptPreviewComponent` | Renders the prepared prompt preview fallback and generated prompt text. |
 | `HandoffPanelComponent` | Renders provider handoff guidance, copy/open controls, unsaved handoff note, and handoff messages. |
 
+Fourth branch:
+
+```text
+feature/frontend-settings-preferences-split
+```
+
+Fourth extracted component:
+
+| Component | Responsibility |
+| --- | --- |
+| `WorkflowSettingsPanelComponent` | Renders default work mode settings and provider preference routing-order controls. |
+
 `App` still owns the forms, signals, persistence calls, task workflow, and page orchestration.
 
 ---
@@ -83,7 +95,7 @@ Commands/checks:
 Frontend build output:
 
 ```text
-Initial total: 448.88 kB raw / 107.29 kB estimated transfer
+Initial total: 453.86 kB raw / 107.78 kB estimated transfer
 ```
 
 Authenticated browser smoke check confirmed the extracted New Task controls still update:
@@ -98,6 +110,8 @@ Authenticated browser smoke check confirmed the extracted New Task controls stil
 
 The template/handoff split was also verified with frontend tests and production build. Browser smoke should be rerun if template application or copy/open behavior changes again.
 
+The settings/provider preferences split was verified with frontend tests and production build.
+
 ---
 
 ## Next Split Candidates
@@ -105,10 +119,9 @@ The template/handoff split was also verified with frontend tests and production 
 Recommended order:
 
 1. Extract auth form.
-2. Extract settings/provider preferences.
-3. Extract history list and task detail.
-4. Extract auth form.
-5. Decide whether routing is needed after component boundaries are clean.
+2. Extract history list and task detail.
+3. Extract auth form.
+4. Decide whether routing is needed after component boundaries are clean.
 
 Keep each extraction behavior-preserving. Run build, tests, and a browser smoke test after each meaningful slice.
 

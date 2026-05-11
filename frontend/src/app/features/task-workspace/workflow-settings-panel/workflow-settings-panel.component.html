@@ -1,0 +1,158 @@
+<section id="settings" class="settings-panel">
+  <div class="workspace-header">
+    <div>
+      <p class="eyebrow">Settings</p>
+      <h2>Workflow defaults</h2>
+    </div>
+  </div>
+
+  <form class="settings-form" [formGroup]="settingsForm()">
+    <label>
+      Default work mode
+      <select formControlName="defaultWorkMode">
+        @for (workMode of workModes(); track workMode) {
+          <option [value]="workMode">{{ workModeLabels()[workMode] }}</option>
+        }
+      </select>
+    </label>
+
+    <button
+      class="secondary-button"
+      type="button"
+      (click)="defaultWorkModeSaved.emit()"
+      [disabled]="settingsSaving() || authLoading()"
+    >
+      {{ settingsSaving() ? 'Saving...' : 'Save default' }}
+    </button>
+  </form>
+
+  @if (currentDefaultWorkMode(); as defaultWorkMode) {
+    <p class="subtle-note">Current default: {{ workModeLabels()[defaultWorkMode] }}</p>
+  }
+
+  @if (settingsMessage()) {
+    <p class="form-message" [class.error]="settingsMessageIsError()">
+      {{ settingsMessage() }}
+    </p>
+  }
+
+  <section class="detail-block">
+    <div class="workspace-header">
+      <div>
+        <p class="eyebrow">Provider preferences</p>
+        <h3>Routing order</h3>
+      </div>
+
+      <button
+        class="secondary-button"
+        type="button"
+        (click)="providerPreferencesRefreshed.emit()"
+        [disabled]="providerPreferencesLoading() || providerPreferenceSaving()"
+      >
+        {{ providerPreferencesLoading() ? 'Loading...' : 'Refresh preferences' }}
+      </button>
+    </div>
+
+    <form class="history-filter-form" [formGroup]="providerPreferenceForm()">
+      <div class="history-filter-grid">
+        <label>
+          Category
+          <select formControlName="category">
+            @for (category of taskCategories(); track category) {
+              <option [value]="category">{{ taskCategoryLabels()[category] }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          Work mode scope
+          <select formControlName="workModeScope">
+            @for (workModeScope of workModeScopes(); track workModeScope) {
+              <option [value]="workModeScope">{{ workModeScopeLabel(workModeScope) }}</option>
+            }
+          </select>
+        </label>
+      </div>
+    </form>
+
+    @if (providerPreferencesLoading()) {
+      <p class="empty-state">Loading provider preferences...</p>
+    } @else {
+      <ol class="timeline-list">
+        @for (providerId of providerPreferenceOrder(); track providerId; let index = $index) {
+          <li>
+            <div>
+              <strong>{{ index + 1 }}. {{ providerName(providerId) }}</strong>
+            </div>
+
+            <div class="handoff-actions">
+              <button
+                class="text-button"
+                type="button"
+                (click)="providerPreferenceMoved.emit({ providerId, direction: -1 })"
+                [disabled]="index === 0"
+              >
+                Up
+              </button>
+              <button
+                class="text-button"
+                type="button"
+                (click)="providerPreferenceMoved.emit({ providerId, direction: 1 })"
+                [disabled]="index === providerPreferenceOrder().length - 1"
+              >
+                Down
+              </button>
+            </div>
+          </li>
+        }
+      </ol>
+
+      <div class="handoff-actions">
+        <button
+          class="secondary-button"
+          type="button"
+          (click)="providerPreferenceOrderReset.emit()"
+        >
+          Reset order
+        </button>
+
+        <button
+          class="primary-button"
+          type="button"
+          (click)="providerPreferenceSaved.emit()"
+          [disabled]="
+            providerPreferenceSaving() ||
+            providerPreferencesLoading() ||
+            !providerPreferenceHasChanges()
+          "
+        >
+          {{ providerPreferenceSaving() ? 'Saving...' : 'Save provider order' }}
+        </button>
+      </div>
+    }
+
+    @if (selectedProviderPreference(); as preference) {
+      <p class="subtle-note">
+        Saved preference active for
+        {{ taskCategoryLabels()[preference.category] }} /
+        {{ preference.work_mode ? workModeLabels()[preference.work_mode] : 'Any mode' }}.
+      </p>
+    } @else {
+      <p class="subtle-note">No saved preference for this scope yet.</p>
+    }
+
+    <p class="subtle-note">
+      {{
+        providerPreferenceHasChanges()
+          ? 'Unsaved provider order changes.'
+          : 'Provider order matches the saved or default order.'
+      }}
+    </p>
+
+    @if (providerPreferenceMessage()) {
+      <p class="form-message" [class.error]="providerPreferenceMessageIsError()">
+        {{ providerPreferenceMessage() }}
+      </p>
+    }
+  </section>
+</section>
