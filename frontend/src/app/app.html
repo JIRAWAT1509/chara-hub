@@ -130,189 +130,33 @@
           (providerPreferenceSaved)="saveProviderPreference()"
         />
 
-        <section id="history" class="recent-tasks">
-          <div class="workspace-header">
-            <div>
-              <p class="eyebrow">History</p>
-              <h2>Saved handoffs</h2>
-            </div>
+        <app-task-history-panel
+          [historyFilterForm]="historyFilterForm"
+          [recentTasks]="recentTasks()"
+          [filteredRecentTasks]="filteredRecentTasks()"
+          [recentTasksLoading]="recentTasksLoading()"
+          [selectedTaskId]="selectedTaskDetail()?.task?.id ?? null"
+          [taskCategories]="taskCategories"
+          [taskCategoryLabels]="taskCategoryLabels"
+          [workModes]="workModes"
+          [workModeLabels]="workModeLabels"
+          [taskStatuses]="taskStatuses"
+          [taskStatusLabels]="taskStatusLabels"
+          (recentTasksRefreshed)="loadRecentTasks()"
+          (historyFiltersCleared)="clearHistoryFilters()"
+          (taskViewed)="viewTaskDetail($event)"
+          (taskReused)="reuseTask($event)"
+        />
 
-            <button
-              class="secondary-button"
-              type="button"
-              (click)="loadRecentTasks()"
-              [disabled]="recentTasksLoading()"
-            >
-              {{ recentTasksLoading() ? 'Refreshing...' : 'Refresh' }}
-            </button>
-          </div>
-
-          <form class="history-filter-form" [formGroup]="historyFilterForm">
-            <label>
-              Search
-              <input
-                type="search"
-                formControlName="search"
-                placeholder="Search title, prompt, status, or mode"
-              />
-            </label>
-
-            <div class="history-filter-grid">
-              <label>
-                Category
-                <select formControlName="category">
-                  <option value="ALL">All categories</option>
-                  @for (category of taskCategories; track category) {
-                    <option [value]="category">{{ taskCategoryLabels[category] }}</option>
-                  }
-                </select>
-              </label>
-
-              <label>
-                Work mode
-                <select formControlName="workMode">
-                  <option value="ALL">All modes</option>
-                  @for (workMode of workModes; track workMode) {
-                    <option [value]="workMode">{{ workModeLabels[workMode] }}</option>
-                  }
-                </select>
-              </label>
-
-              <label>
-                Status
-                <select formControlName="status">
-                  <option value="ALL">All statuses</option>
-                  @for (status of taskStatuses; track status) {
-                    <option [value]="status">{{ taskStatusLabels[status] }}</option>
-                  }
-                </select>
-              </label>
-            </div>
-
-            <div class="history-filter-summary">
-              <span>{{ filteredRecentTasks().length }} of {{ recentTasks().length }} shown</span>
-              <button class="text-button" type="button" (click)="clearHistoryFilters()">
-                Clear filters
-              </button>
-            </div>
-          </form>
-
-          @if (recentTasksLoading() && !recentTasks().length) {
-            <p class="empty-state">Loading saved tasks...</p>
-          } @else if (filteredRecentTasks().length) {
-            <div class="recent-task-list">
-              @for (task of filteredRecentTasks(); track task.id) {
-                <article
-                  class="recent-task-item"
-                  [class.selected]="selectedTaskDetail()?.task?.id === task.id"
-                >
-                  <div>
-                    <h3>{{ task.title || 'Untitled task' }}</h3>
-                    <p>{{ task.raw_prompt }}</p>
-                  </div>
-                  <div class="recent-task-meta">
-                    <span>{{ taskStatusLabels[task.status] }}</span>
-                    <span>{{ taskCategoryLabels[task.category] }}</span>
-                    <span>{{ workModeLabels[task.work_mode] }}</span>
-                    <button class="text-button" type="button" (click)="viewTaskDetail(task)">
-                      View
-                    </button>
-                    <button class="text-button" type="button" (click)="reuseTask(task)">
-                      Reuse
-                    </button>
-                  </div>
-                </article>
-              }
-            </div>
-          } @else if (recentTasks().length) {
-            <p class="empty-state">No saved tasks match the current filters.</p>
-          } @else {
-            <p class="empty-state">No saved tasks yet.</p>
-          }
-        </section>
-
-        <section class="task-detail-panel">
-          <div class="workspace-header">
-            <div>
-              <p class="eyebrow">Task detail</p>
-              <h2>Saved prompt and timeline</h2>
-            </div>
-
-            @if (selectedTaskDetail()) {
-              <button class="secondary-button" type="button" (click)="closeTaskDetail()">
-                Close
-              </button>
-            }
-          </div>
-
-          @if (taskDetailLoading()) {
-            <p class="empty-state">Loading task detail...</p>
-          } @else if (taskDetailMessage()) {
-            <p class="form-message error">{{ taskDetailMessage() }}</p>
-          } @else if (selectedTaskDetail(); as detail) {
-            <div class="task-detail-grid">
-              <section class="detail-block">
-                <p class="eyebrow">Task</p>
-                <h3>{{ detail.task.title || 'Untitled task' }}</h3>
-                <div class="detail-meta">
-                  <span>{{ taskStatusLabels[detail.task.status] }}</span>
-                  <span>{{ taskCategoryLabels[detail.task.category] }}</span>
-                  <span>{{ workModeLabels[detail.task.work_mode] }}</span>
-                </div>
-                <p>{{ detail.task.raw_prompt }}</p>
-              </section>
-
-              <section class="detail-block">
-                <p class="eyebrow">Recommendation</p>
-
-                @if (detail.recommendation) {
-                  <h3>{{ providerName(detail.recommendation.primary_provider_id) }}</h3>
-                  <div class="detail-meta">
-                    <span>{{ (detail.recommendation.confidence * 100).toFixed(0) }}%</span>
-                    @for (
-                      providerId of detail.recommendation.alternative_provider_ids;
-                      track providerId
-                    ) {
-                      <span>{{ providerName(providerId) }}</span>
-                    }
-                  </div>
-                  <p>{{ detail.recommendation.reason }}</p>
-                } @else {
-                  <p>No provider recommendation saved for this task.</p>
-                }
-              </section>
-            </div>
-
-            <section class="detail-block">
-              <p class="eyebrow">Prepared prompt</p>
-              <pre>{{ detail.task.prepared_prompt || 'No prepared prompt saved.' }}</pre>
-            </section>
-
-            <section class="detail-block">
-              <p class="eyebrow">Timeline</p>
-
-              @if (detail.history.length) {
-                <ol class="timeline-list">
-                  @for (event of detail.history; track event.id) {
-                    <li>
-                      <div>
-                        <strong>{{ historyEventLabel(event.event_type) }}</strong>
-                        @if (event.provider_id) {
-                          <span>{{ providerName(event.provider_id) }}</span>
-                        }
-                      </div>
-                      <time>{{ formatDateTime(event.created_at) }}</time>
-                    </li>
-                  }
-                </ol>
-              } @else {
-                <p class="empty-state">No history events recorded yet.</p>
-              }
-            </section>
-          } @else {
-            <p class="empty-state">Select a recent task to inspect its saved prompt and events.</p>
-          }
-        </section>
+        <app-task-detail-panel
+          [selectedTaskDetail]="selectedTaskDetail()"
+          [taskDetailLoading]="taskDetailLoading()"
+          [taskDetailMessage]="taskDetailMessage()"
+          [taskCategoryLabels]="taskCategoryLabels"
+          [workModeLabels]="workModeLabels"
+          [taskStatusLabels]="taskStatusLabels"
+          (taskDetailClosed)="closeTaskDetail()"
+        />
       </section>
     } @else {
       <form class="auth-form" [formGroup]="authForm" (ngSubmit)="submit()">

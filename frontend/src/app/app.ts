@@ -34,6 +34,8 @@ import {
   ProviderPreferenceMove,
   WorkflowSettingsPanelComponent,
 } from './features/task-workspace/workflow-settings-panel/workflow-settings-panel.component';
+import { TaskDetailPanelComponent } from './features/task-workspace/task-detail-panel/task-detail-panel.component';
+import { TaskHistoryPanelComponent } from './features/task-workspace/task-history-panel/task-history-panel.component';
 import { BrandHeaderComponent } from './shared/brand-header/brand-header.component';
 import { BuildContextPanelComponent } from './shared/build-context-panel/build-context-panel.component';
 import { DashboardSummaryComponent } from './shared/dashboard-summary/dashboard-summary.component';
@@ -97,15 +99,6 @@ const PROVIDER_IDS: ProviderId[] = [
   'claude_code',
 ];
 
-const TASK_HISTORY_EVENT_LABELS: Record<string, string> = {
-  CREATED: 'Created',
-  CLASSIFIED: 'Classified',
-  TEMPLATE_APPLIED: 'Template applied',
-  COPIED_PROMPT: 'Copied prompt',
-  OPENED_PROVIDER: 'Opened provider',
-  ARCHIVED: 'Archived',
-};
-
 @Component({
   selector: 'app-root',
   imports: [
@@ -117,6 +110,8 @@ const TASK_HISTORY_EVENT_LABELS: Record<string, string> = {
     NewTaskFormComponent,
     PreparedPromptPreviewComponent,
     PromptTemplatePanelComponent,
+    TaskDetailPanelComponent,
+    TaskHistoryPanelComponent,
     TaskRoutingResultsComponent,
     WorkflowSettingsPanelComponent,
   ],
@@ -881,29 +876,6 @@ export class App {
       behavior: 'smooth',
       block: 'start',
     });
-  }
-
-  protected providerName(providerId: ProviderId | null): string {
-    if (!providerId) {
-      return 'No provider';
-    }
-
-    return PROVIDER_NAMES[providerId] ?? providerId;
-  }
-
-  protected workModeScopeLabel(workModeScope: WorkModeScope): string {
-    return workModeScope === 'ANY' ? 'Any mode' : this.workModeLabels[workModeScope];
-  }
-
-  protected historyEventLabel(eventType: string): string {
-    return TASK_HISTORY_EVENT_LABELS[eventType] ?? eventType;
-  }
-
-  protected formatDateTime(value: string): string {
-    return new Intl.DateTimeFormat(undefined, {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(new Date(value));
   }
 
   private async loadTaskDetail(taskId: string): Promise<void> {

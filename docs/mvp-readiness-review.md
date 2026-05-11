@@ -79,6 +79,7 @@ Commands run:
 | New Task workspace split authenticated smoke check | Passed |
 | Template and handoff split automated checks | Passed |
 | Settings and provider preferences split automated checks | Passed |
+| History and task detail split automated checks | Passed |
 
 Frontend production build:
 
@@ -112,6 +113,7 @@ Browser smoke coverage so far:
 - New Task workspace split kept task form binding, prompt character count, routing result panels, prepared prompt preview, and action readiness working correctly
 - template and handoff split kept Angular build and unit tests passing while preserving App-owned workflow actions
 - settings and provider preferences split kept Angular build and unit tests passing while preserving App-owned persistence and preference-order actions
+- history and task detail split kept Angular build and unit tests passing while preserving App-owned load/reuse/detail actions
 
 [Back to Table of Contents](#table-of-contents)
 
@@ -143,7 +145,7 @@ These are the remaining risks before broader usage:
 
 | Blocker | Why It Matters | Recommended Action |
 | --- | --- | --- |
-| Large single Angular shell | The MVP works, but `app.ts` / `app.html` still own too much orchestration and markup. | Continue behavior-preserving component splits for history/detail and auth. |
+| Large single Angular shell | The MVP works, but `app.ts` / `app.html` still owns auth markup and orchestration. | Extract the auth form next, then decide whether routing is worthwhile. |
 | Smoke-test data cleanup | The authenticated run created one task titled `Smoke test task`. | Keep it as test evidence or remove it manually later if the UI gets delete support. |
 | Backend status browser check | Public HTTP browser check passed; HTTPS remains useful if Tao runs the dev server over HTTPS. | Recheck only if switching the frontend origin to HTTPS or a different port. |
 
@@ -173,20 +175,20 @@ These should remain deferred unless a concrete need appears:
 
 # Recommended Next Slice
 
-Recommended next branch after merging the settings and provider preferences split:
+Recommended next branch after merging the history and task detail split:
 
 ```text
-feature/frontend-history-detail-split
+feature/frontend-auth-form-split
 ```
 
 Recommended scope:
 
-1. Extract history list, history filters, and task detail panels.
+1. Extract the sign-in/sign-up auth form.
 2. Preserve the existing task workflow behavior.
 3. Keep Angular Router deferred unless real route-level navigation is chosen.
 4. Run the same build/test/browser smoke checks after the split.
 
-This is the right next step because history/detail is the next large inline workflow area, but it can still be split without changing persistence or routing behavior.
+This is the right next step because auth is the largest remaining inline markup area in `app.html`.
 
 [Back to Table of Contents](#table-of-contents)
 

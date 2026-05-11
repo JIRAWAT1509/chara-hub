@@ -61,6 +61,19 @@ Fourth extracted component:
 | --- | --- |
 | `WorkflowSettingsPanelComponent` | Renders default work mode settings and provider preference routing-order controls. |
 
+Fifth branch:
+
+```text
+feature/frontend-history-detail-split
+```
+
+Fifth extracted components:
+
+| Component | Responsibility |
+| --- | --- |
+| `TaskHistoryPanelComponent` | Renders history filters, saved task list, refresh action, empty states, view action, and reuse action. |
+| `TaskDetailPanelComponent` | Renders selected task detail, recommendation detail, prepared prompt, and timeline. |
+
 `App` still owns the forms, signals, persistence calls, task workflow, and page orchestration.
 
 ---
@@ -95,7 +108,7 @@ Commands/checks:
 Frontend build output:
 
 ```text
-Initial total: 453.86 kB raw / 107.78 kB estimated transfer
+Initial total: 457.45 kB raw / 108.15 kB estimated transfer
 ```
 
 Authenticated browser smoke check confirmed the extracted New Task controls still update:
@@ -112,6 +125,8 @@ The template/handoff split was also verified with frontend tests and production 
 
 The settings/provider preferences split was verified with frontend tests and production build.
 
+The history/detail split was verified with frontend tests and production build.
+
 ---
 
 ## Next Split Candidates
@@ -119,9 +134,7 @@ The settings/provider preferences split was verified with frontend tests and pro
 Recommended order:
 
 1. Extract auth form.
-2. Extract history list and task detail.
-3. Extract auth form.
-4. Decide whether routing is needed after component boundaries are clean.
+2. Decide whether routing is needed after component boundaries are clean.
 
 Keep each extraction behavior-preserving. Run build, tests, and a browser smoke test after each meaningful slice.
 
